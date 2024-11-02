@@ -1,0 +1,17 @@
+.nav-container {
+  margin-top: -10;
+  height: inherit;
+  width: 100%;
+  position: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .nav-left {
+    padding-left: 1rem;
+  }
+
+  .nav-right {
+    padding-right: 1rem;
+  }
+}

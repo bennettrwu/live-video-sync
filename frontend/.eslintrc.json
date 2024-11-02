@@ -1,0 +1,27 @@
+{
+  "extends": [
+    "./node_modules/gts/",
+    "plugin:react-hooks/recommended"
+  ],
+  "ignorePatterns": [
+    "dist"
+  ],
+  "plugins": [
+    "react-refresh"
+  ],
+  "rules": {
+    "react-refresh/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "n/no-unpublished-import": [
+      "off",
+      {
+        "allowModules": [],
+        "convertPath": null
+      }
+    ]
+  }
+}
