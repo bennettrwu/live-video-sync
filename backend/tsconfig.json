@@ -5,14 +5,9 @@
     "outDir": "build",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "paths": {
-      "@common/*": [
-        "./node_modules/live-video-sync-common/src/*"
-      ]
-    }
   },
   "include": [
     "src/**/*.ts",
-    "test/**/*.ts"
+    "test/**/*.ts",
   ]
 }

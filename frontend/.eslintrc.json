@@ -1,15 +1,25 @@
 {
+  "root": true,
   "extends": [
-    "./node_modules/gts/",
-    "plugin:react-hooks/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react-hooks/recommended",
+    "./node_modules/gts/"
   ],
   "ignorePatterns": [
     "dist"
   ],
   "plugins": [
+    "@typescript-eslint",
     "react-refresh"
   ],
+  "parserOptions": {
+    "project": [
+      "./tsconfig.app.json"
+    ]
+  },
   "rules": {
+    "no-throw-literal": "error",
+    "@typescript-eslint/no-throw-literal": "error",
     "react-refresh/only-export-components": [
       "warn",
       {
@@ -21,6 +31,13 @@
       {
         "allowModules": [],
         "convertPath": null
+      }
+    ],
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto",
+        "printWidth": 100
       }
     ]
   }

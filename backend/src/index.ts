@@ -1,25 +1,20 @@
-import dotenv from 'dotenv';
-import createLogger from './logger';
-import Fastify from 'fastify';
-import FastifyWebsocket from '@fastify/websocket';
-import {v4 as uuidv4} from 'uuid';
-import websocketHandler from './roomSyncAPIv1';
+import createDependencyContainer from './dependency-injection/create-dependency-container';
+import createServer from './server/create-server';
 
-// Grab configuration from .env file
-dotenv.config();
+async function init() {
+  const dependencyContainer = createDependencyContainer();
 
-const log = createLogger(process.env.LOG_LEVEL, process.env.LOG_DEST);
+  const logger = dependencyContainer.resolve('logger');
+  const config = dependencyContainer.resolve('config');
 
-// Setup fastify server
-const fastify = Fastify({loggerInstance: log, genReqId: () => uuidv4()});
-fastify.register(FastifyWebsocket);
-fastify.register(websocketHandler);
-fastify.listen(
-  {port: process.env.PORT ? parseInt(process.env.PORT) : 8080},
-  err => {
-    if (err) {
-      fastify.log.fatal(err);
-      throw err;
-    }
+  const fastify = createServer(dependencyContainer);
+
+  try {
+    await fastify.listen({port: config.server.port, host: config.server.host});
+  } catch (err) {
+    logger.fatal({msg: 'Failed to start fastify webserver', err});
+    throw err; // terminate if fails to start
   }
-);
+}
+
+init();

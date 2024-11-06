@@ -1,10 +1,5 @@
 import {ReactElement, useEffect} from 'react';
-import {
-  Button,
-  MantineColorScheme,
-  useCombobox,
-  useMantineColorScheme,
-} from '@mantine/core';
+import {Button, MantineColorScheme, useCombobox, useMantineColorScheme} from '@mantine/core';
 import {useLocalStorage} from '@mantine/hooks';
 
 import {FaMoon, FaRobot, FaSun} from 'react-icons/fa6';

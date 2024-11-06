@@ -2,13 +2,9 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import Player from 'video.js/dist/types/player';
 
-import {parseJSONMessage} from '@common/utils/parseJSONMessage';
-import {
-  parseServerSyncMessage,
-  ServerSyncState,
-} from '@common/utils/parseSyncMessage';
-
 const reconnect_timeout = 1_000;
+const sync_loop_rate = 1_000;
+const ignore_userevent_listners_timeout = 100;
 
 type SyncEvents = {
   joined: () => unknown;
@@ -31,7 +27,7 @@ export default class SyncEngine {
 
   private _events = new EventEmitter() as TypedEmitter<SyncEvents>;
 
-  private _targetState: ServerSyncState = {
+  private _targetState = {
     time: 0,
     paused: true,
     syncTime: Date.now() / 1_000,
@@ -56,8 +52,7 @@ export default class SyncEngine {
     fetch(`/roomSyncAPI/v1/${roomId}/mediaList`)
       .then(response => response.json())
       .then(json => {
-        console.log(json);
-        // Todo: Types for this
+        // Todo: Types and validation for this
         this._mediaList = json;
         this._events.emit('mediaListUpdate', this._mediaList as []);
       });
@@ -74,8 +69,7 @@ export default class SyncEngine {
 
         const targetTime = this._targetState.paused
           ? this._targetState.time
-          : this._targetState.time +
-            (Date.now() / 1_000 - this._targetState.syncTime);
+          : this._targetState.time + (Date.now() / 1_000 - this._targetState.syncTime);
         if (Math.abs(time - targetTime) > 1) {
           this._playerRef?.current?.currentTime(targetTime);
 
@@ -88,8 +82,9 @@ export default class SyncEngine {
         this._playerRef?.current?.pause();
         this._videojsRef?.current?.classList.add('vjs-waiting');
       }
-      setTimeout(() => (this._ignore = false), 100);
-    }, 500);
+
+      setTimeout(() => (this._ignore = false), ignore_userevent_listners_timeout);
+    }, sync_loop_rate);
   }
 
   private _allReady() {
@@ -128,8 +123,7 @@ export default class SyncEngine {
 
     this._ws.addEventListener('message', msg => {
       try {
-        const jsonObject = parseJSONMessage(msg.data);
-        const message = parseServerSyncMessage(jsonObject);
+        const message = JSON.parse(msg.data);
 
         console.log(`Received State ${JSON.stringify(message)}`);
 
