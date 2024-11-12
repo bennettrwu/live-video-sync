@@ -1,21 +1,27 @@
 import {asFunction, asValue, AwilixContainer} from 'awilix';
-import {config, ConfigType} from '../config/config';
-import createLogger, {Logger} from '../shared/logger/logger';
-import * as liveVideoSyncDBSchema from '../shared/live-video-sync-db/live-video-sync-db.schema';
-import liveVideoSyncDB, {LiveVideoSyncDB} from '../shared/live-video-sync-db/live-video-sync-db';
+import {CONFIG, ConfigType} from '../config/config.js';
+import createLogger, {Logger} from '@shared/logger/logger.js';
+import liveVideoSyncDB, {LiveVideoSyncDB} from '@shared/live-video-sync-db/live-video-sync-db.js';
+
+// Declare the types of objects contained in Awilix container
+// New dependencies should update Dependencies interface in the global namespace
 
 declare global {
   interface Dependencies {
     config: ConfigType;
     logger: Logger;
     liveVideoSyncDB: LiveVideoSyncDB;
-    liveVideoSyncDBSchema: typeof liveVideoSyncDBSchema;
   }
 }
 
-export function registerBaseDependencies(di: AwilixContainer) {
+/**
+ * Registers global dependencies with given dependency container
+ * @param di
+ * @returns updated dependency container
+ */
+export function registerBaseDependencies(di: AwilixContainer): AwilixContainer<Dependencies> {
   di.register({
-    config: asValue(config),
+    config: asValue(CONFIG),
   });
 
   di.register({
@@ -24,10 +30,6 @@ export function registerBaseDependencies(di: AwilixContainer) {
 
   di.register({
     liveVideoSyncDB: asFunction(liveVideoSyncDB).singleton(),
-  });
-
-  di.register({
-    liveVideoSyncDBSchema: asValue(liveVideoSyncDBSchema),
   });
 
   return di;

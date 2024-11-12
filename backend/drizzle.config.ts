@@ -1,4 +1,4 @@
-import {config} from './src/config/config';
+import {CONFIG} from './src/config/config';
 import {defineConfig} from "drizzle-kit";
 
 export default defineConfig({
@@ -6,6 +6,6 @@ export default defineConfig({
   schema: "./src/shared/live-video-sync-db/live-video-sync-db.schema.ts",
   out: "./drizzle",
   dbCredentials: {
-    url: config.db.url
+    url: CONFIG.db.url
   },
 });

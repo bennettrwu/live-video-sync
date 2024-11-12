@@ -1,20 +1,37 @@
-import {FastifyInstance} from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import {asValue} from 'awilix';
-import {Logger} from '../../../shared/logger/logger';
-import {v4 as uuidv4} from 'uuid';
+import {Logger} from '@shared/logger/logger.js';
+import {AppFastifyInstance} from '@shared/types/fastify.js';
 
-export default fastifyPlugin((fastify: FastifyInstance) => {
-  fastify.addHook('onRequest', (req, res, done) => {
-    // TODO Add better logging
-    const reqId = (req.headers['request-id'] || req.headers['x-request-id'] || uuidv4()) as string;
+// Logs when a request is received and creates child logger instance with tracing context
+export default fastifyPlugin((fastify: AppFastifyInstance) => {
+  fastify.addHook('onRequest', (req, reply, done) => {
+    const requestid = req.id;
+    const traceid = req.headers['x-b3-traceid'];
+    const spanid = req.headers['x-b3-spanid'];
+    const parentspanid = req.headers['x-b3-parentspanid'];
+    const sampled = req.headers['x-b3-sampled'];
+    const flags = req.headers['x-b3-flags'];
 
-    req.id = reqId;
-    req.log = req.log.child({reqId});
-    req.diScope.register({
-      logger: asValue(req.log as Logger),
+    const traceContext = {
+      requestid,
+      traceid,
+      spanid,
+      parentspanid,
+      sampled,
+      flags,
+    };
+
+    req.log = req.log.child({traceContext});
+    req.diScope.register({logger: asValue(req.log as Logger)});
+
+    req.log.info({
+      msg: 'incoming request',
+      method: req.method,
+      url: req.url,
+      path: req.routeOptions.url,
+      parameters: req.params,
     });
-    req.log.info({msg: 'incoming request', req});
     done();
   });
 });

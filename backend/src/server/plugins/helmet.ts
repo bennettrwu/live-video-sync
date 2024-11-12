@@ -1,7 +1,8 @@
 import fastifyHelmet from '@fastify/helmet';
-import {FastifyInstance} from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
+import {AppFastifyInstance} from '@shared/types/fastify.js';
 
-export default fastifyPlugin((fastify: FastifyInstance) => {
+// Register fastify helmet plugin to set secure security headers
+export default fastifyPlugin((fastify: AppFastifyInstance) => {
   fastify.register(fastifyHelmet);
 });

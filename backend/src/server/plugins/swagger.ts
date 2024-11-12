@@ -1,9 +1,10 @@
 import Swagger from '@fastify/swagger';
 import SwaggerUI from '@fastify/swagger-ui';
-import {FastifyInstance} from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
+import {AppFastifyInstance} from '@shared/types/fastify.js';
 
-export default fastifyPlugin(async (fastify: FastifyInstance) => {
+// Registers Swagger and Swagger UI to generate API documentation
+export default fastifyPlugin(async (fastify: AppFastifyInstance) => {
   const config = fastify.diContainer.resolve('config');
 
   // Don't expose swagger if in production
@@ -16,6 +17,21 @@ export default fastifyPlugin(async (fastify: FastifyInstance) => {
         title: 'Live Video Sync API',
         description: 'The Swagger API documentation for Live Video Sync API.',
         version: process.env.npm_package_version ?? '0.0.0',
+      },
+      tags: [
+        {name: 'Accounts', description: 'Account management related endpoints'},
+        {name: 'Admin', description: 'Administation related endpoints'},
+      ],
+      components: {
+        securitySchemes: {
+          sessionToken: {
+            type: 'apiKey',
+            name: 'sessionToken',
+            in: 'cookie',
+            description:
+              'Session token required for authenticated endpoints. Note that setting a value here in SwaggerUI does not authenticate you, use the /accounts/v1/login endpoint instead.',
+          },
+        },
       },
     },
   });

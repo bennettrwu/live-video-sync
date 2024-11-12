@@ -1,49 +1,103 @@
-import {integer, pgTable, timestamp, varchar, pgEnum, text} from 'drizzle-orm/pg-core';
+import {gt, sql} from 'drizzle-orm';
+import {
+  integer,
+  pgTable,
+  timestamp,
+  varchar,
+  pgEnum,
+  text,
+  uniqueIndex,
+  pgView,
+  index,
+} from 'drizzle-orm/pg-core';
 
-export const accounts = pgTable('accounts', {
-  user_id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  password_hash: varchar({length: 256}).notNull(),
-  username: varchar({length: 256}).notNull().unique(),
-});
+// Schema definitions for liveVideoSyncDB
 
-export const sessions = pgTable('sessions', {
-  token: varchar({length: 64}).primaryKey(),
-  user_id: integer()
-    .references(() => accounts.user_id, {
-      onDelete: 'cascade',
-      onUpdate: 'cascade',
-    })
-    .notNull(),
-  expires: timestamp({precision: 0}).notNull(),
-});
+export const ACCOUNTS_TABLE = pgTable(
+  'accounts',
+  {
+    userId: integer().primaryKey().generatedAlwaysAsIdentity(),
+    passwordHash: varchar({length: 256}).notNull(),
+    username: varchar({length: 256}).notNull().unique(),
+  },
+  table => [
+    {
+      accountsUsernameIndex: uniqueIndex('accountsUsernameIndex').on(table.username),
+    },
+  ],
+);
 
-export const rooms = pgTable('rooms', {
-  room_id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  owner_id: integer()
-    .references(() => accounts.user_id, {
-      onDelete: 'cascade',
-      onUpdate: 'cascade',
-    })
-    .notNull(),
-  room_name: varchar({length: 256}).notNull(),
-});
+export const SESSIONS_TABLE = pgTable(
+  'sessions',
+  {
+    token: varchar({length: 64}).primaryKey(),
+    userId: integer()
+      .references(() => ACCOUNTS_TABLE.userId, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      })
+      .notNull(),
+    expires: timestamp({precision: 0}).notNull(),
+  },
+  table => [
+    {
+      sessionUserIdIndex: uniqueIndex('sessionUserIdIndex').on(table.userId),
+      sessionExpiresIndex: uniqueIndex('sessionExpiresIndex').on(table.expires),
+    },
+  ],
+);
 
-export const roomUsers = pgTable('roomUsers', {
-  room_id: integer()
-    .references(() => rooms.room_id, {
-      onDelete: 'cascade',
-      onUpdate: 'cascade',
-    })
-    .notNull(),
-  user_id: integer()
-    .references(() => accounts.user_id, {
-      onDelete: 'cascade',
-      onUpdate: 'cascade',
-    })
-    .notNull(),
-});
+export const SESSIONS_VIEW = pgView('sessionsView').as(qb =>
+  qb
+    .select()
+    .from(SESSIONS_TABLE)
+    .where(gt(SESSIONS_TABLE.expires, sql`(current_timestamp)`)),
+);
 
-export const upload_status = pgEnum('upload_status', [
+export const ROOMS_TABLE = pgTable(
+  'rooms',
+  {
+    roomId: integer().primaryKey().generatedAlwaysAsIdentity(),
+    ownerId: integer()
+      .references(() => ACCOUNTS_TABLE.userId, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      })
+      .notNull(),
+    roomName: varchar({length: 256}).notNull(),
+  },
+  table => [
+    {
+      roomsOwnerIdIndex: uniqueIndex('roomsOwnerIdIndex').on(table.ownerId),
+    },
+  ],
+);
+
+export const ROOM_USERS = pgTable(
+  'roomUsers',
+  {
+    roomId: integer()
+      .references(() => ROOMS_TABLE.roomId, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      })
+      .notNull(),
+    userId: integer()
+      .references(() => ACCOUNTS_TABLE.userId, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      })
+      .notNull(),
+  },
+  table => [
+    {
+      roomsUsersRoomIdIndex: index('roomsUsersRoomIdIndex').on(table.roomId),
+      roomsUsersUserIdIndex: index('roomsUsersUserIdIndex').on(table.userId),
+    },
+  ],
+);
+
+export const UPLOAD_STATUS = pgEnum('upload_status', [
   'uploading',
   'uploadFailed',
   'parsing',
@@ -53,29 +107,37 @@ export const upload_status = pgEnum('upload_status', [
   'done',
 ]);
 
-export const uploadStatus = pgTable('uploadStatus', {
-  upload_id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  room_id: integer()
-    .references(() => rooms.room_id, {
+export const UPLOAD_STATUS_TABLE = pgTable('uploadStatus', {
+  uploadId: integer().primaryKey().generatedAlwaysAsIdentity(),
+  roomId: integer()
+    .references(() => ROOMS_TABLE.roomId, {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     })
     .notNull(),
-  upload_status: upload_status().notNull(),
-  parsed_info: text(),
+  uploadStatus: UPLOAD_STATUS().notNull(),
+  parsedInfo: text(),
 });
 
-export const media = pgTable('mediaTable', {
-  room_id: integer()
-    .references(() => rooms.room_id, {
-      onDelete: 'cascade',
-      onUpdate: 'cascade',
-    })
-    .notNull(),
-  index: integer().generatedAlwaysAsIdentity().notNull(),
-  video_url: varchar({length: 2048}).notNull(),
-  video_mime: varchar({length: 256}).notNull(),
-  sub_url: varchar({length: 2048}),
-  sub_lang: varchar({length: 256}),
-  sub_label: varchar({length: 256}),
-});
+export const MEDIA_TABLE = pgTable(
+  'mediaTable',
+  {
+    mediaId: integer().primaryKey().generatedAlwaysAsIdentity(),
+    roomId: integer()
+      .references(() => ROOMS_TABLE.roomId, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      })
+      .notNull(),
+    videoUrl: varchar({length: 2048}).notNull(),
+    videoMime: varchar({length: 256}).notNull(),
+    subUrl: varchar({length: 2048}),
+    subLang: varchar({length: 256}),
+    subLabel: varchar({length: 256}),
+  },
+  table => [
+    {
+      mediaRoomIdIndex: index('mediaRoomIdIndex').on(table.roomId),
+    },
+  ],
+);

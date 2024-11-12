@@ -1,8 +1,13 @@
-import pino from 'pino';
+import {pino} from 'pino';
 
 export type Logger = pino.Logger;
 
-export default function logger({config}: Dependencies): Logger {
+/**
+ * Creates a logger instance using app configuration
+ * @param config dependency injected configuration object
+ * @returns created logger
+ */
+export default function logger(config: Dependencies['config']): Logger {
   let transports = pino.transport({
     level: config.log.level,
     target: 'pino/file',
@@ -10,6 +15,8 @@ export default function logger({config}: Dependencies): Logger {
       destination: config.log.file,
     },
   });
+
+  // Also print to console if in development
   if (config.isDevelopment) {
     transports = pino.transport({
       targets: [
@@ -29,7 +36,10 @@ export default function logger({config}: Dependencies): Logger {
     });
   }
 
-  const logger = pino({level: config.log.level}, transports);
+  const logger = pino(
+    {level: config.log.level, serializers: {err: pino.stdSerializers.errWithCause}},
+    transports,
+  );
 
   logger.info(`Log level set to: ${config.log.level}`);
   logger.info(`Log file saved to: ${config.log.file}`);

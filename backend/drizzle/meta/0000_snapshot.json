@@ -1,5 +1,5 @@
 {
-  "id": "1a4a6549-83af-47a8-abb8-9a805b4366a2",
+  "id": "eb5479e8-7895-44bc-89b5-0e575d6589ca",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,14 +8,14 @@
       "name": "accounts",
       "schema": "",
       "columns": {
-        "user_id": {
-          "name": "user_id",
+        "userId": {
+          "name": "userId",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "accounts_user_id_seq",
+            "name": "accounts_userId_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -25,8 +25,8 @@
             "cycle": false
           }
         },
-        "password_hash": {
-          "name": "password_hash",
+        "passwordHash": {
+          "name": "passwordHash",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
@@ -58,20 +58,14 @@
       "name": "mediaTable",
       "schema": "",
       "columns": {
-        "room_id": {
-          "name": "room_id",
+        "mediaId": {
+          "name": "mediaId",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "index": {
-          "name": "index",
-          "type": "integer",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "mediaTable_index_seq",
+            "name": "mediaTable_mediaId_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -81,32 +75,38 @@
             "cycle": false
           }
         },
-        "video_url": {
-          "name": "video_url",
+        "roomId": {
+          "name": "roomId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "videoUrl": {
+          "name": "videoUrl",
           "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": true
         },
-        "video_mime": {
-          "name": "video_mime",
+        "videoMime": {
+          "name": "videoMime",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
         },
-        "sub_url": {
-          "name": "sub_url",
+        "subUrl": {
+          "name": "subUrl",
           "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": false
         },
-        "sub_lang": {
-          "name": "sub_lang",
+        "subLang": {
+          "name": "subLang",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
         },
-        "sub_label": {
-          "name": "sub_label",
+        "subLabel": {
+          "name": "subLabel",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false
@@ -114,67 +114,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "mediaTable_room_id_rooms_room_id_fk": {
-          "name": "mediaTable_room_id_rooms_room_id_fk",
+        "mediaTable_roomId_rooms_roomId_fk": {
+          "name": "mediaTable_roomId_rooms_roomId_fk",
           "tableFrom": "mediaTable",
           "tableTo": "rooms",
           "columnsFrom": [
-            "room_id"
+            "roomId"
           ],
           "columnsTo": [
-            "room_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.roomUsers": {
-      "name": "roomUsers",
-      "schema": "",
-      "columns": {
-        "room_id": {
-          "name": "room_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "roomUsers_room_id_rooms_room_id_fk": {
-          "name": "roomUsers_room_id_rooms_room_id_fk",
-          "tableFrom": "roomUsers",
-          "tableTo": "rooms",
-          "columnsFrom": [
-            "room_id"
-          ],
-          "columnsTo": [
-            "room_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        },
-        "roomUsers_user_id_accounts_user_id_fk": {
-          "name": "roomUsers_user_id_accounts_user_id_fk",
-          "tableFrom": "roomUsers",
-          "tableTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
+            "roomId"
           ],
           "onDelete": "cascade",
           "onUpdate": "cascade"
@@ -190,14 +138,14 @@
       "name": "rooms",
       "schema": "",
       "columns": {
-        "room_id": {
-          "name": "room_id",
+        "roomId": {
+          "name": "roomId",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "rooms_room_id_seq",
+            "name": "rooms_roomId_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -207,14 +155,14 @@
             "cycle": false
           }
         },
-        "owner_id": {
-          "name": "owner_id",
+        "ownerId": {
+          "name": "ownerId",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "room_name": {
-          "name": "room_name",
+        "roomName": {
+          "name": "roomName",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
@@ -222,15 +170,67 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "rooms_owner_id_accounts_user_id_fk": {
-          "name": "rooms_owner_id_accounts_user_id_fk",
+        "rooms_ownerId_accounts_userId_fk": {
+          "name": "rooms_ownerId_accounts_userId_fk",
           "tableFrom": "rooms",
           "tableTo": "accounts",
           "columnsFrom": [
-            "owner_id"
+            "ownerId"
           ],
           "columnsTo": [
-            "user_id"
+            "userId"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.roomUsers": {
+      "name": "roomUsers",
+      "schema": "",
+      "columns": {
+        "roomId": {
+          "name": "roomId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "roomUsers_roomId_rooms_roomId_fk": {
+          "name": "roomUsers_roomId_rooms_roomId_fk",
+          "tableFrom": "roomUsers",
+          "tableTo": "rooms",
+          "columnsFrom": [
+            "roomId"
+          ],
+          "columnsTo": [
+            "roomId"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "roomUsers_userId_accounts_userId_fk": {
+          "name": "roomUsers_userId_accounts_userId_fk",
+          "tableFrom": "roomUsers",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "userId"
           ],
           "onDelete": "cascade",
           "onUpdate": "cascade"
@@ -252,8 +252,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "userId": {
+          "name": "userId",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -267,15 +267,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "sessions_user_id_accounts_user_id_fk": {
-          "name": "sessions_user_id_accounts_user_id_fk",
+        "sessions_userId_accounts_userId_fk": {
+          "name": "sessions_userId_accounts_userId_fk",
           "tableFrom": "sessions",
           "tableTo": "accounts",
           "columnsFrom": [
-            "user_id"
+            "userId"
           ],
           "columnsTo": [
-            "user_id"
+            "userId"
           ],
           "onDelete": "cascade",
           "onUpdate": "cascade"
@@ -291,14 +291,14 @@
       "name": "uploadStatus",
       "schema": "",
       "columns": {
-        "upload_id": {
-          "name": "upload_id",
+        "uploadId": {
+          "name": "uploadId",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "uploadStatus_upload_id_seq",
+            "name": "uploadStatus_uploadId_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -308,21 +308,21 @@
             "cycle": false
           }
         },
-        "room_id": {
-          "name": "room_id",
+        "roomId": {
+          "name": "roomId",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "upload_status": {
-          "name": "upload_status",
+        "uploadStatus": {
+          "name": "uploadStatus",
           "type": "upload_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
-        "parsed_info": {
-          "name": "parsed_info",
+        "parsedInfo": {
+          "name": "parsedInfo",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -330,15 +330,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "uploadStatus_room_id_rooms_room_id_fk": {
-          "name": "uploadStatus_room_id_rooms_room_id_fk",
+        "uploadStatus_roomId_rooms_roomId_fk": {
+          "name": "uploadStatus_roomId_rooms_roomId_fk",
           "tableFrom": "uploadStatus",
           "tableTo": "rooms",
           "columnsFrom": [
-            "room_id"
+            "roomId"
           ],
           "columnsTo": [
-            "room_id"
+            "roomId"
           ],
           "onDelete": "cascade",
           "onUpdate": "cascade"
@@ -370,7 +370,35 @@
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
+  "views": {
+    "public.sessionsView": {
+      "columns": {
+        "token": {
+          "name": "token",
+          "type": "varchar(64)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp (0)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "definition": "select \"token\", \"userId\", \"expires\" from \"sessions\" where \"sessions\".\"expires\" > (current_timestamp)",
+      "name": "sessionsView",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    }
+  },
   "_meta": {
     "columns": {},
     "schemas": {},
