@@ -47,11 +47,7 @@ export function createAppError(code: string, messageTemplate: string, isOperatio
 
 // All application errors
 export const APP_ERRORS = Object.freeze({
-  UNHANDLED_REJECTION: createAppError(
-    'UNHANDLED_REJECTION',
-    'A promise rejection was not caught and handled',
-    false,
-  ),
+  UNHANDLED_REJECTION: createAppError('UNHANDLED_REJECTION', 'A promise rejection was not caught and handled', false),
 
   THROWN_OBJECT_NOT_ERROR: createAppError(
     'THROWN_OBJECT_NOT_ERROR',
@@ -77,47 +73,19 @@ export const APP_ERRORS = Object.freeze({
     false,
   ),
 
-  UNEXPECTED_DATABASE_ERROR: createAppError(
-    'UNEXPECTED_DATABASE_ERROR',
-    'An unexpected database error occured',
-    false,
-  ),
+  UNEXPECTED_DATABASE_ERROR: createAppError('UNEXPECTED_DATABASE_ERROR', 'An unexpected database error occured', false),
 
-  PASSWORD_HASH_ERROR: createAppError(
-    'PASSWORD_HASH_ERROR',
-    'Unexpected failure when hashing password',
-    false,
-  ),
+  PASSWORD_HASH_ERROR: createAppError('PASSWORD_HASH_ERROR', 'Unexpected failure when hashing password', false),
 
-  PASSWORD_VERIFY_ERROR: createAppError(
-    'PASSWORD_VERIFY_ERROR',
-    'Unexpected failure when verifying password',
-    false,
-  ),
+  PASSWORD_VERIFY_ERROR: createAppError('PASSWORD_VERIFY_ERROR', 'Unexpected failure when verifying password', false),
 
-  DUPLICATE_USERNAME: createAppError(
-    'DUPLICATE_USERNAME',
-    'User with username "%s" already exists in database',
-    true,
-  ),
+  DUPLICATE_USERNAME: createAppError('DUPLICATE_USERNAME', 'User with username "%s" already exists in database', true),
 
-  USER_ID_NOT_FOUND: createAppError(
-    'USER_ID_NOT_FOUND',
-    'User with user_id %i was not found in database',
-    true,
-  ),
+  USER_ID_NOT_FOUND: createAppError('USER_ID_NOT_FOUND', 'User with user_id %i was not found in database', true),
 
-  USERNAME_NOT_FOUND: createAppError(
-    'USERNAME_NOT_FOUND',
-    'User with username %i was not found in database',
-    true,
-  ),
+  USERNAME_NOT_FOUND: createAppError('USERNAME_NOT_FOUND', 'User with username %i was not found in database', true),
 
-  DUPLICATE_SESSION_TOKEN: createAppError(
-    'DUPLICATE_SESSION_TOKEN',
-    'Session token already exists in database',
-    true,
-  ),
+  DUPLICATE_SESSION_TOKEN: createAppError('DUPLICATE_SESSION_TOKEN', 'Session token already exists in database', true),
 
   VALID_SESSION_NOT_FOUND: createAppError(
     'VALID_SESSION_NOT_FOUND',

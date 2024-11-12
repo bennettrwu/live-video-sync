@@ -36,10 +36,7 @@ export default function logger(config: Dependencies['config']): Logger {
     });
   }
 
-  const logger = pino(
-    {level: config.log.level, serializers: {err: pino.stdSerializers.errWithCause}},
-    transports,
-  );
+  const logger = pino({level: config.log.level, serializers: {err: pino.stdSerializers.errWithCause}}, transports);
 
   logger.info(`Log level set to: ${config.log.level}`);
   logger.info(`Log file saved to: ${config.log.file}`);

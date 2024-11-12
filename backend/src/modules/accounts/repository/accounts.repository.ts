@@ -30,10 +30,7 @@ export default class AccountsRepository {
     );
 
     if (insertErr) {
-      if (
-        insertErr instanceof pg.DatabaseError &&
-        insertErr.constraint === 'accounts_username_unique'
-      ) {
+      if (insertErr instanceof pg.DatabaseError && insertErr.constraint === 'accounts_username_unique') {
         throw new APP_ERRORS.DUPLICATE_USERNAME(username);
       }
       throw new APP_ERRORS.UNEXPECTED_DATABASE_ERROR().causedBy(insertErr);

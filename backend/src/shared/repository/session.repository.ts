@@ -23,9 +23,7 @@ export default class SessionRepository {
    * @param expires
    */
   async saveSessionToken(userId: number, token: string, expires: Date) {
-    const [, insertErr] = await etp(
-      this.liveVideoSyncDB.insert(SESSIONS_TABLE).values({token, userId, expires}),
-    );
+    const [, insertErr] = await etp(this.liveVideoSyncDB.insert(SESSIONS_TABLE).values({token, userId, expires}));
 
     if (insertErr) {
       if (insertErr instanceof pg.DatabaseError) {

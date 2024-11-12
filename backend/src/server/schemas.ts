@@ -11,8 +11,7 @@ export const SHARED_REPLY_SCHEMA = {
       requestId: Type.String(),
     },
     {
-      description:
-        'Response when request had a client error. Message will contain user facing reason why.',
+      description: 'Response when request had a client error. Message will contain user facing reason why.',
     },
   ),
   500: Type.Object(
@@ -22,8 +21,7 @@ export const SHARED_REPLY_SCHEMA = {
       requestId: Type.String(),
     },
     {
-      description:
-        'Response when server encounters an unexpected error. Message will contain user facing reason why.',
+      description: 'Response when server encounters an unexpected error. Message will contain user facing reason why.',
     },
   ),
 };

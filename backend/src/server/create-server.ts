@@ -40,9 +40,7 @@ export default function createServer(dependencyContainer: AwilixContainer<Depend
     .withTypeProvider<TypeBoxTypeProvider>()
     .setErrorHandler(errorHandler)
     .setNotFoundHandler(notFoundHandler)
-    .setGenReqId(
-      req => (req.headers['request-id'] || req.headers['x-request-id'] || uuidv4()) as string,
-    );
+    .setGenReqId(req => (req.headers['request-id'] || req.headers['x-request-id'] || uuidv4()) as string);
 
   // Register dependency injection container
   fastify.register(fastifyAwilixPlugin, {

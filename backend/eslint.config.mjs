@@ -1,9 +1,10 @@
 import js from "@eslint/js";
 import path from "node:path";
 import tsParser from "@typescript-eslint/parser";
-import { FlatCompat } from "@eslint/eslintrc";
-import { fileURLToPath } from "node:url";
-import { fixupConfigRules } from "@eslint/compat";
+import typescriptEslint from "@typescript-eslint/eslint-plugin"
+import {FlatCompat} from "@eslint/eslintrc";
+import {fileURLToPath} from "node:url";
+import {fixupConfigRules, fixupPluginRules} from "@eslint/compat";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,10 @@ export default [{
 },
 ...fixupConfigRules(compat.extends("plugin:@typescript-eslint/recommended", "./node_modules/gts/")),
 {
+    plugins: {
+        "@typescript-eslint": fixupPluginRules(typescriptEslint),
+    },
+
     languageOptions: {
         parser: tsParser,
         ecmaVersion: 5,

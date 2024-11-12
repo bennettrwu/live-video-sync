@@ -10,9 +10,7 @@ import {APP_ERRORS} from '../errors/app-errors.js';
  * @param p
  * @returns wrapped promise
  */
-export async function errorTuplePromise<R>(
-  p: Promise<R>,
-): Promise<[R, undefined] | [undefined, Error]> {
+export async function errorTuplePromise<R>(p: Promise<R>): Promise<[R, undefined] | [undefined, Error]> {
   try {
     const r = await p;
     return [r, undefined];

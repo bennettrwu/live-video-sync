@@ -28,9 +28,7 @@ export default class SessionService {
     // Retry insertion in case of conflicts with randomly generated session tokens
     for (let i = 0; i < 10; i++) {
       const token = crypto.randomBytes(32).toString('hex');
-      const [, saveErr] = await etp(
-        this.sessionRepository.saveSessionToken(userId, token, expires),
-      );
+      const [, saveErr] = await etp(this.sessionRepository.saveSessionToken(userId, token, expires));
 
       if (!saveErr) return {token, expires};
       // If error is not due to duplicate session token, throw error, otherwise retry

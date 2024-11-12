@@ -1,15 +1,5 @@
 import {gt, sql} from 'drizzle-orm';
-import {
-  integer,
-  pgTable,
-  timestamp,
-  varchar,
-  pgEnum,
-  text,
-  uniqueIndex,
-  pgView,
-  index,
-} from 'drizzle-orm/pg-core';
+import {integer, pgTable, timestamp, varchar, pgEnum, text, uniqueIndex, pgView, index} from 'drizzle-orm/pg-core';
 
 // Schema definitions for liveVideoSyncDB
 
