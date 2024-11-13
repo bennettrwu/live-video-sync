@@ -30,9 +30,9 @@ export async function errorTuplePromise<R>(p: Promise<R>): Promise<[R, undefined
  * @param p
  * @returns result tuple
  */
-export function errorTupleFunction<R>(
-  f: (...args: unknown[]) => R,
-  ...args: unknown[]
+export function errorTupleFunction<R, A extends unknown[]>(
+  f: (...args: A) => R,
+  ...args: A
 ): [R, undefined] | [undefined, Error] {
   try {
     const r = f(...args);

@@ -10,8 +10,16 @@ export const LOGIN_ACCOUNT_SCHEMA = {
   tags: ['Accounts'],
   body: Type.Object(
     {
-      username: Type.String({minLength: 1, maxLength: 256}),
-      password: Type.String({minLength: 1, maxLength: 256}),
+      username: Type.String({
+        minLength: 1,
+        maxLength: 256,
+        errorMessage: 'Username must be between 1 and 256 characters long.',
+      }),
+      password: Type.String({
+        minLength: 8,
+        maxLength: 256,
+        errorMessage: 'Password must be between 8 and 256 characters long.',
+      }),
     },
     {description: 'User credentials'},
   ),

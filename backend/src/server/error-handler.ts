@@ -1,5 +1,5 @@
 import {FastifyReply, FastifyRequest} from 'fastify';
-import {HttpError} from '@shared/errors/http-errors.js';
+import {HTTP_ERRORS, HttpError} from '@shared/errors/http-errors.js';
 import {APP_ERRORS, AppError} from '../shared/errors/app-errors.js';
 
 /**
@@ -15,6 +15,12 @@ export default function errorHandler(err: unknown, req: FastifyRequest, reply: F
       req.log.error({msg: 'Request encountered a non operational error', err});
     } else {
       req.log.warn({msg: 'Request encountered an operational error', err});
+    }
+
+    if (err instanceof HTTP_ERRORS.BAD_REQUEST) {
+      return reply
+        .code(err.statusCode)
+        .send({success: false, statusCode: err.statusCode, requestErrors: err.requestErrors, requestId: req.id});
     }
 
     return reply

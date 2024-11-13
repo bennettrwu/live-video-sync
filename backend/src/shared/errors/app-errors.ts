@@ -73,6 +73,12 @@ export const APP_ERRORS = Object.freeze({
     false,
   ),
 
+  UNDEFINED_SCHEMA_ERROR_MESSAGE: createAppError(
+    'UNDEFINED_SCHEMA_ERROR_MESSAGE',
+    'A schema validation error occured on property that did not have a user facing errorMessage defined',
+    false,
+  ),
+
   UNEXPECTED_DATABASE_ERROR: createAppError('UNEXPECTED_DATABASE_ERROR', 'An unexpected database error occured', false),
 
   PASSWORD_HASH_ERROR: createAppError('PASSWORD_HASH_ERROR', 'Unexpected failure when hashing password', false),

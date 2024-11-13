@@ -10,8 +10,16 @@ export const CREATE_ACCOUNT_SCHEMA = {
   tags: ['Accounts'],
   body: Type.Object(
     {
-      username: Type.String({minLength: 1, maxLength: 256}),
-      password: Type.String({minLength: 1, maxLength: 256}),
+      username: Type.String({
+        minLength: 1,
+        maxLength: 256,
+        errorMessage: 'Username must be between 1 and 256 characters long.',
+      }),
+      password: Type.String({
+        minLength: 8,
+        maxLength: 256,
+        errorMessage: 'Password must be between 8 and 256 characters long.',
+      }),
     },
     {description: 'New user account credentials'},
   ),
@@ -28,7 +36,9 @@ export const CREATE_ACCOUNT_SCHEMA = {
 
 function errorHandler(error: Error) {
   if (error instanceof APP_ERRORS.DUPLICATE_USERNAME) {
-    throw new HTTP_ERRORS.BAD_REQUEST('An account with given username already exists.').causedBy(error);
+    throw new HTTP_ERRORS.BAD_REQUEST([
+      {message: 'An account with given username already exists.', key: '/body/username'},
+    ]).causedBy(error);
   }
 
   throw new HTTP_ERRORS.INTERNAL_SERVER_ERROR(
