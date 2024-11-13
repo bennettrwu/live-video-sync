@@ -1,5 +1,5 @@
 {
-  "id": "eb5479e8-7895-44bc-89b5-0e575d6589ca",
+  "id": "37daf370-9459-4234-bc9f-8a71be2323bd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -38,7 +38,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "accountsUsernameIndex": {
+          "name": "accountsUsernameIndex",
+          "columns": [
+            {
+              "expression": "username",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -112,7 +128,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "mediaRoomIdIndex": {
+          "name": "mediaRoomIdIndex",
+          "columns": [
+            {
+              "expression": "roomId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "mediaTable_roomId_rooms_roomId_fk": {
           "name": "mediaTable_roomId_rooms_roomId_fk",
@@ -168,7 +200,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "roomsOwnerIdIndex": {
+          "name": "roomsOwnerIdIndex",
+          "columns": [
+            {
+              "expression": "ownerId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "rooms_ownerId_accounts_userId_fk": {
           "name": "rooms_ownerId_accounts_userId_fk",
@@ -207,7 +255,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "roomsUsersRoomIdIndex": {
+          "name": "roomsUsersRoomIdIndex",
+          "columns": [
+            {
+              "expression": "roomId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "roomsUsersUserIdIndex": {
+          "name": "roomsUsersUserIdIndex",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "roomUsers_roomId_rooms_roomId_fk": {
           "name": "roomUsers_roomId_rooms_roomId_fk",
@@ -236,7 +315,15 @@
           "onUpdate": "cascade"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "test": {
+          "name": "test",
+          "columns": [
+            "roomId",
+            "userId"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -265,7 +352,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "sessionUserIdIndex": {
+          "name": "sessionUserIdIndex",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sessionExpiresIndex": {
+          "name": "sessionExpiresIndex",
+          "columns": [
+            {
+              "expression": "expires",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "sessions_userId_accounts_userId_fk": {
           "name": "sessions_userId_accounts_userId_fk",

@@ -1,5 +1,17 @@
 import {gt, sql} from 'drizzle-orm';
-import {integer, pgTable, timestamp, varchar, pgEnum, text, uniqueIndex, pgView, index} from 'drizzle-orm/pg-core';
+import {
+  serial,
+  integer,
+  pgTable,
+  timestamp,
+  varchar,
+  pgEnum,
+  text,
+  uniqueIndex,
+  pgView,
+  index,
+  primaryKey,
+} from 'drizzle-orm/pg-core';
 
 // Schema definitions for liveVideoSyncDB
 
@@ -10,11 +22,7 @@ export const ACCOUNTS_TABLE = pgTable(
     passwordHash: varchar({length: 256}).notNull(),
     username: varchar({length: 256}).notNull().unique(),
   },
-  table => [
-    {
-      accountsUsernameIndex: uniqueIndex('accountsUsernameIndex').on(table.username),
-    },
-  ],
+  table => [uniqueIndex('accountsUsernameIndex').on(table.username)],
 );
 
 export const SESSIONS_TABLE = pgTable(
@@ -29,12 +37,7 @@ export const SESSIONS_TABLE = pgTable(
       .notNull(),
     expires: timestamp({precision: 0}).notNull(),
   },
-  table => [
-    {
-      sessionUserIdIndex: uniqueIndex('sessionUserIdIndex').on(table.userId),
-      sessionExpiresIndex: uniqueIndex('sessionExpiresIndex').on(table.expires),
-    },
-  ],
+  table => [uniqueIndex('sessionUserIdIndex').on(table.userId), uniqueIndex('sessionExpiresIndex').on(table.expires)],
 );
 
 export const SESSIONS_VIEW = pgView('sessionsView').as(qb =>
@@ -56,11 +59,7 @@ export const ROOMS_TABLE = pgTable(
       .notNull(),
     roomName: varchar({length: 256}).notNull(),
   },
-  table => [
-    {
-      roomsOwnerIdIndex: uniqueIndex('roomsOwnerIdIndex').on(table.ownerId),
-    },
-  ],
+  table => [uniqueIndex('roomsOwnerIdIndex').on(table.ownerId)],
 );
 
 export const ROOM_USERS = pgTable(
@@ -80,10 +79,9 @@ export const ROOM_USERS = pgTable(
       .notNull(),
   },
   table => [
-    {
-      roomsUsersRoomIdIndex: index('roomsUsersRoomIdIndex').on(table.roomId),
-      roomsUsersUserIdIndex: index('roomsUsersUserIdIndex').on(table.userId),
-    },
+    primaryKey({columns: [table.roomId, table.userId]}),
+    index('roomsUsersRoomIdIndex').on(table.roomId),
+    index('roomsUsersUserIdIndex').on(table.userId),
   ],
 );
 
@@ -125,9 +123,5 @@ export const MEDIA_TABLE = pgTable(
     subLang: varchar({length: 256}),
     subLabel: varchar({length: 256}),
   },
-  table => [
-    {
-      mediaRoomIdIndex: index('mediaRoomIdIndex').on(table.roomId),
-    },
-  ],
+  table => [index('mediaRoomIdIndex').on(table.roomId)],
 );
