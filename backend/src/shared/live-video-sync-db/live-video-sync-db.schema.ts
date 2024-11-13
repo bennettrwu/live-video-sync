@@ -1,6 +1,5 @@
 import {gt, sql} from 'drizzle-orm';
 import {
-  serial,
   integer,
   pgTable,
   timestamp,
@@ -78,11 +77,7 @@ export const ROOM_USERS = pgTable(
       })
       .notNull(),
   },
-  table => [
-    primaryKey({columns: [table.roomId, table.userId]}),
-    index('roomsUsersRoomIdIndex').on(table.roomId),
-    index('roomsUsersUserIdIndex').on(table.userId),
-  ],
+  table => [primaryKey(table.roomId, table.userId)],
 );
 
 export const UPLOAD_STATUS = pgEnum('upload_status', [

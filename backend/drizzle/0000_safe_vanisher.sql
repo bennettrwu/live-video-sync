@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS "rooms" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "roomUsers" (
 	"roomId" integer NOT NULL,
-	"userId" integer NOT NULL
+	"userId" integer NOT NULL,
+	CONSTRAINT "roomUsers_roomId_userId_pk" PRIMARY KEY("roomId","userId")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "sessions" (
@@ -76,4 +77,9 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "accountsUsernameIndex" ON "accounts" USING btree ("username");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "mediaRoomIdIndex" ON "mediaTable" USING btree ("roomId");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "roomsOwnerIdIndex" ON "rooms" USING btree ("ownerId");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "sessionUserIdIndex" ON "sessions" USING btree ("userId");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "sessionExpiresIndex" ON "sessions" USING btree ("expires");--> statement-breakpoint
 CREATE VIEW "public"."sessionsView" AS (select "token", "userId", "expires" from "sessions" where "sessions"."expires" > (current_timestamp));

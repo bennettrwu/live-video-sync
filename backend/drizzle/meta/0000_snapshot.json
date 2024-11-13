@@ -1,5 +1,5 @@
 {
-  "id": "37daf370-9459-4234-bc9f-8a71be2323bd",
+  "id": "3e86cb5f-1567-4458-ab06-8047383800fd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -255,38 +255,7 @@
           "notNull": true
         }
       },
-      "indexes": {
-        "roomsUsersRoomIdIndex": {
-          "name": "roomsUsersRoomIdIndex",
-          "columns": [
-            {
-              "expression": "roomId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "roomsUsersUserIdIndex": {
-          "name": "roomsUsersUserIdIndex",
-          "columns": [
-            {
-              "expression": "userId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "roomUsers_roomId_rooms_roomId_fk": {
           "name": "roomUsers_roomId_rooms_roomId_fk",
@@ -316,8 +285,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "test": {
-          "name": "test",
+        "roomUsers_roomId_userId_pk": {
+          "name": "roomUsers_roomId_userId_pk",
           "columns": [
             "roomId",
             "userId"
