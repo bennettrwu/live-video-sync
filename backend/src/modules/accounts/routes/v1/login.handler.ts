@@ -30,13 +30,16 @@ export const LOGIN_ACCOUNT_SCHEMA = {
       },
       {description: 'Successfully logged into account'},
     ),
-    ...SHARED_REPLY_SCHEMA,
+    400: SHARED_REPLY_SCHEMA[400],
+    500: SHARED_REPLY_SCHEMA[500],
   },
 };
 
 function errorHandler(error: Error) {
   if (error instanceof APP_ERRORS.USERNAME_NOT_FOUND || error instanceof APP_ERRORS.INVALID_ACCOUNT_CREDENTIALS) {
-    throw new HTTP_ERRORS.UNAUTHORIZED('Username and/or password did not match an accounts on record.').causedBy(error);
+    throw new HTTP_ERRORS.UNAUTHORIZED('Username and/or password did not match any accounts on record.').causedBy(
+      error,
+    );
   }
 
   throw new HTTP_ERRORS.INTERNAL_SERVER_ERROR(

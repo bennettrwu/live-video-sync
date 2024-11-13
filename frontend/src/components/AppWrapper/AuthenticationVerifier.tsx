@@ -1,5 +1,5 @@
 import {notifications} from '@mantine/notifications';
-import apiWhoAmI from '@src/api/accounts/who-am-i';
+import accountAPIWhoAmI from '@src/api/accounts/who-am-i';
 import {logIn, logOut} from '@src/redux/reducers/loggedInUser';
 import {useAppDispatch} from '@src/redux/store';
 import {useEffect, useRef} from 'react';
@@ -21,7 +21,7 @@ export default function AuthenticationVerifier() {
     async function checkLogin() {
       controller = new AbortController();
 
-      const result = await apiWhoAmI(controller);
+      const result = await accountAPIWhoAmI(controller);
       if (!result) return;
 
       if (result.success) {

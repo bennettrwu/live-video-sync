@@ -1,5 +1,5 @@
 import {AppFastifyInstance} from '@shared/types/fastify.js';
-import {createAccountHandler, CREATE_ACCOUNT_SCHEMA} from './v1/create-account.handler.js';
+import {createAccountHandler, CREATE_ACCOUNT_SCHEMA} from './v1/create.handler.js';
 import {LOGIN_ACCOUNT_SCHEMA, loginAccountHandler} from './v1/login.handler.js';
 import {WHO_AM_I_ACCOUNT_SCHEMA, whoAmIAccountHandler} from './v1/who-am-i.handler.js';
 import {LOGOUT_ACCOUNT_SCHEMA, logoutAccountHandler} from './v1/logout.handler.js';

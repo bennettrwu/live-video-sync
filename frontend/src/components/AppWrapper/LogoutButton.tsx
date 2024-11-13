@@ -1,7 +1,7 @@
 import {Button} from '@mantine/core';
 import {useDisclosure} from '@mantine/hooks';
 import {notifications} from '@mantine/notifications';
-import apiLogout from '@src/api/accounts/logout';
+import accountAPILogout from '@src/api/accounts/logout';
 import {logOut} from '@src/redux/reducers/loggedInUser';
 import {useAppDispatch} from '@src/redux/store';
 import {FaArrowRightFromBracket} from 'react-icons/fa6';
@@ -15,7 +15,7 @@ export default function LogoutButton() {
   async function logout() {
     startLogout();
 
-    const result = await apiLogout();
+    const result = await accountAPILogout();
     if (!result) return doneLogout();
 
     if (result.success) {

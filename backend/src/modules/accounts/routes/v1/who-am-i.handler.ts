@@ -17,7 +17,9 @@ export const WHO_AM_I_ACCOUNT_SCHEMA = {
       },
       {description: 'Account username of session'},
     ),
-    ...SHARED_REPLY_SCHEMA,
+    400: SHARED_REPLY_SCHEMA[400],
+    401: SHARED_REPLY_SCHEMA[401],
+    500: SHARED_REPLY_SCHEMA[500],
   },
 };
 

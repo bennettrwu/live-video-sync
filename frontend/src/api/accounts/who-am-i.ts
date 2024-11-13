@@ -4,7 +4,7 @@ import handleAPIResponse from '../handle-api-response';
 
 const successType = Type.Object({success: Type.Literal(true), username: Type.String()});
 
-export default async function apiWhoAmI(controller?: AbortController) {
+export default async function accountAPIWhoAmI(controller?: AbortController) {
   return await handleAPIResponse<Static<typeof successType>>(
     axios.get('/accounts/v1/who-am-i', {
       baseURL: import.meta.env.VITE_API_BASEURL,

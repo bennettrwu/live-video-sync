@@ -30,7 +30,8 @@ export const CREATE_ACCOUNT_SCHEMA = {
       },
       {description: 'Successfully created account'},
     ),
-    ...SHARED_REPLY_SCHEMA,
+    400: SHARED_REPLY_SCHEMA[400],
+    500: SHARED_REPLY_SCHEMA[500],
   },
 };
 

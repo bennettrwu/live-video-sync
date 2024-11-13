@@ -41,7 +41,7 @@ export const SHARED_REPLY_SCHEMA = {
     },
     {
       description:
-        'Response when request had valid session token but account was not allow to access the resource. Message will contain user facing reason why.',
+        'Response when request had valid session token but account was not allowed to access the resource. Message will contain user facing reason why.',
     },
   ),
   500: Type.Object(

@@ -12,7 +12,8 @@ export default async function healthRoute(fastify: AppFastifyInstance) {
           200: Type.Object({
             success: Type.Literal(true),
           }),
-          ...SHARED_REPLY_SCHEMA,
+          400: SHARED_REPLY_SCHEMA[400],
+          500: SHARED_REPLY_SCHEMA[500],
         },
       },
     },
