@@ -36,7 +36,7 @@ export const SESSIONS_TABLE = pgTable(
       .notNull(),
     expires: timestamp({precision: 0}).notNull(),
   },
-  table => [uniqueIndex('sessionUserIdIndex').on(table.userId), uniqueIndex('sessionExpiresIndex').on(table.expires)],
+  table => [index('sessionUserIdIndex').on(table.userId), index('sessionExpiresIndex').on(table.expires)],
 );
 
 export const SESSIONS_VIEW = pgView('sessionsView').as(qb =>
@@ -58,7 +58,7 @@ export const ROOMS_TABLE = pgTable(
       .notNull(),
     roomName: varchar({length: 256}).notNull(),
   },
-  table => [uniqueIndex('roomsOwnerIdIndex').on(table.ownerId)],
+  table => [index('roomsOwnerIdIndex').on(table.ownerId)],
 );
 
 export const ROOM_USERS = pgTable(
