@@ -1,5 +1,5 @@
 import {ReactElement, useEffect} from 'react';
-import {Button, MantineColorScheme, useCombobox, useMantineColorScheme} from '@mantine/core';
+import {Button, MantineColorScheme, useMantineColorScheme} from '@mantine/core';
 import {useLocalStorage} from '@mantine/hooks';
 
 import {FaMoon, FaRobot, FaSun} from 'react-icons/fa6';
@@ -16,18 +16,7 @@ const iconMap: {[key in MantineColorScheme]: ReactElement} = {
 };
 
 export default function ThemeSelector({showText}: {showText: boolean}) {
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-    onDropdownOpen: eventSource => {
-      if (eventSource === 'keyboard') {
-        combobox.selectActiveOption();
-      } else {
-        combobox.updateSelectedOptionIndex('active');
-      }
-    },
-  });
-
-  const {setColorScheme} = useMantineColorScheme();
+  const {setColorScheme} = useMantineColorScheme({keepTransitions: true});
 
   const [theme, setTheme] = useLocalStorage<MantineColorScheme>({
     key: 'color-scheme',

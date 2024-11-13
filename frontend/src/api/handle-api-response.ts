@@ -1,11 +1,17 @@
 import {Type, type Static, type TObject} from '@sinclair/typebox';
 import {Value} from '@sinclair/typebox/value';
-import {AxiosError, AxiosResponse} from 'axios';
+import {AxiosResponse} from 'axios';
 import axios from 'axios';
 
 const failResponse = Type.Object({
   success: Type.Literal(false),
-  statusCode: Type.Number(),
+  statusCode: Type.Union([
+    Type.Literal(401),
+    Type.Literal(402),
+    Type.Literal(403),
+    Type.Literal(404),
+    Type.Literal(500),
+  ]),
   message: Type.String(),
   requestId: Type.String(),
 });
@@ -37,17 +43,16 @@ export default async function handleAPIResponse<S>(
   apiRequest: Promise<AxiosResponse<unknown, unknown>>,
   successType: TObject,
 ): Promise<S | FailType | InvalidType | undefined> {
-  let response;
   try {
-    response = await apiRequest;
-
+    const response = await apiRequest;
+    console.log('r', response);
     Value.Assert(successType, response.data);
     return response.data as S;
   } catch (error) {
     if (axios.isCancel(error)) return undefined;
 
     try {
-      if (error instanceof AxiosError) {
+      if (axios.isAxiosError(error)) {
         if (error.response?.status === 400) {
           Value.Assert(invalidResponse, error.response.data);
           return error.response.data as InvalidType;

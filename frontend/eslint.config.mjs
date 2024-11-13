@@ -75,7 +75,7 @@ export default [{
                     "classMethod",
                     "variable",
                 ],
-                format: ["camelCase"],
+                format: ["camelCase", "UPPER_CASE"],
             }, {
                 selector: ["function"],
                 format: ["PascalCase", "camelCase"]
