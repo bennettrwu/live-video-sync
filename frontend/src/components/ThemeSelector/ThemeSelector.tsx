@@ -4,12 +4,12 @@ import {useLocalStorage} from '@mantine/hooks';
 
 import {FaMoon, FaRobot, FaSun} from 'react-icons/fa6';
 
-const toggle_map: {[key in MantineColorScheme]: MantineColorScheme} = {
+const toggleMap: {[key in MantineColorScheme]: MantineColorScheme} = {
   dark: 'light',
   light: 'auto',
   auto: 'dark',
 };
-const icon_map: {[key in MantineColorScheme]: ReactElement} = {
+const iconMap: {[key in MantineColorScheme]: ReactElement} = {
   dark: <FaMoon />,
   light: <FaSun />,
   auto: <FaRobot />,
@@ -39,18 +39,14 @@ export default function ThemeSelector({showText}: {showText: boolean}) {
   }, [theme, setColorScheme]);
 
   const toggleTheme = () => {
-    setTheme(toggle_map[theme]);
+    setTheme(toggleMap[theme]);
   };
 
   return (
     <>
-      <Button
-        variant="outline"
-        onClick={toggleTheme}
-        leftSection={showText ? icon_map[theme] : undefined}
-      >
+      <Button variant="outline" onClick={toggleTheme} leftSection={showText ? iconMap[theme] : undefined}>
         {showText && theme}
-        {!showText && icon_map[theme]}
+        {!showText && iconMap[theme]}
       </Button>
     </>
   );

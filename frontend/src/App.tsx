@@ -2,7 +2,7 @@
 // All packages except `@mantine/hooks` require styles imports
 import '@mantine/core/styles.css';
 import {MantineProvider} from '@mantine/core';
-import {AppShell} from '@mantine/core';
+import {Notifications} from '@mantine/notifications';
 
 import {createBrowserRouter, RouterProvider} from 'react-router-dom';
 
@@ -10,43 +10,36 @@ import Theater from './pages/Theater';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
-import PageHeader from './components/PageHeader/PageHeader';
-
-import './App.scss';
+import AppWrapper from './components/AppWrapper/AppWrapper';
+import {Provider} from 'react-redux';
+import {store} from './redux/store';
 
 export default function App() {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Theater />,
+      element: <AppWrapper page={<Theater />} />,
     },
     {
       path: '/login',
-      element: <Login />,
+      element: <AppWrapper page={<Login />} />,
     },
     {
       path: '/signup',
-      element: <Signup />,
+      element: <AppWrapper page={<Signup />} />,
     },
     {
       path: '/*',
-      element: <NotFound />,
+      element: <AppWrapper page={<NotFound />} />,
     },
   ]);
 
   return (
     <MantineProvider>
-      <AppShell header={{height: 60}} padding="md">
-        <AppShell.Header>
-          <PageHeader />
-        </AppShell.Header>
-
-        <AppShell.Main>
-          <div className="center-vertical">
-            <RouterProvider router={router} />
-          </div>
-        </AppShell.Main>
-      </AppShell>
+      <Provider store={store}>
+        <Notifications />
+        <RouterProvider router={router} />
+      </Provider>
     </MantineProvider>
   );
 }

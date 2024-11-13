@@ -2,9 +2,9 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import Player from 'video.js/dist/types/player';
 
-const reconnect_timeout = 1_000;
-const sync_loop_rate = 1_000;
-const ignore_userevent_listners_timeout = 100;
+const reconnectTimeout = 1_000;
+const syncLoopRate = 1_000;
+const ignoreUserEventListnersTimeout = 100;
 
 type SyncEvents = {
   joined: () => unknown;
@@ -23,7 +23,7 @@ export default class SyncEngine {
   private _playerRef?: React.RefObject<Player>;
 
   private _ws?: WebSocket;
-  private _syncLoop: NodeJS.Timeout;
+  private _syncLoop: number;
 
   private _events = new EventEmitter() as TypedEmitter<SyncEvents>;
 
@@ -39,7 +39,7 @@ export default class SyncEngine {
   private _ignore = false;
 
   private _joined = false;
-  private _joinTimeout?: NodeJS.Timeout;
+  private _joinTimeout?: number;
 
   get events() {
     return this._events;
@@ -55,11 +55,12 @@ export default class SyncEngine {
         // Todo: Types and validation for this
         this._mediaList = json;
         this._events.emit('mediaListUpdate', this._mediaList as []);
-      });
+      })
+      .catch(() => {});
 
     this._connectWebsocket(roomId);
 
-    this._syncLoop = setInterval(() => {
+    this._syncLoop = setInterval(async () => {
       const time = this._playerRef?.current?.currentTime();
       if (typeof time === 'undefined') return;
 
@@ -73,9 +74,7 @@ export default class SyncEngine {
         if (Math.abs(time - targetTime) > 1) {
           this._playerRef?.current?.currentTime(targetTime);
 
-          this._targetState.paused
-            ? this._playerRef?.current?.pause()
-            : this._playerRef?.current?.play();
+          await (this._targetState.paused ? this._playerRef?.current?.pause() : this._playerRef?.current?.play());
         }
       } else {
         // Fake buffering
@@ -83,8 +82,8 @@ export default class SyncEngine {
         this._videojsRef?.current?.classList.add('vjs-waiting');
       }
 
-      setTimeout(() => (this._ignore = false), ignore_userevent_listners_timeout);
-    }, sync_loop_rate);
+      setTimeout(() => (this._ignore = false), ignoreUserEventListnersTimeout);
+    }, syncLoopRate);
   }
 
   private _allReady() {
@@ -116,7 +115,7 @@ export default class SyncEngine {
     this._ws.addEventListener('close', e => {
       console.log('Websocket closed', e);
       this._joined = false;
-      setTimeout(() => this._connectWebsocket(roomId), reconnect_timeout);
+      setTimeout(() => this._connectWebsocket(roomId), reconnectTimeout);
     });
 
     this._ws.addEventListener('open', e => console.log('Websocket opened', e));
@@ -172,7 +171,7 @@ export default class SyncEngine {
         time,
         paused,
         mediaIndex: this._targetState.mediaIndex,
-      })
+      }),
     );
   }
 
@@ -200,10 +199,7 @@ export default class SyncEngine {
     this._playerRef?.current?.off('waiting', this._onUnready);
   }
 
-  registerPlayerRef(
-    videojsRef: React.RefObject<HTMLDivElement>,
-    playerRef: React.RefObject<Player>
-  ) {
+  registerPlayerRef(videojsRef: React.RefObject<HTMLDivElement>, playerRef: React.RefObject<Player>) {
     this._videojsRef = videojsRef;
     this._playerRef = playerRef;
 

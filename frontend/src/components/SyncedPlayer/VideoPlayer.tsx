@@ -6,7 +6,7 @@ import 'video.js/dist/video-js.css';
 import SyncEngine from './syncEngine';
 
 interface VideoPlayerProps extends BoxProps {
-  thumbnail_url?: string;
+  thumbnailUrl?: string;
   video: {src: string; type: string};
   subtitles?: {src: string; langugage: string; label: string};
   syncEngine?: SyncEngine;
@@ -20,13 +20,7 @@ type PlayerExtended = {
   };
 } & Player;
 
-export const VideoPlayer: FC<VideoPlayerProps> = ({
-  thumbnail_url,
-  video,
-  subtitles,
-  syncEngine,
-  ...props
-}) => {
+export function VideoPlayer({thumbnailUrl, video, subtitles, syncEngine, ...props}: VideoPlayerProps) {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<PlayerExtended | null>(null);
 
@@ -56,7 +50,7 @@ export const VideoPlayer: FC<VideoPlayerProps> = ({
               },
             ]
           : [],
-        poster: thumbnail_url,
+        poster: thumbnailUrl,
       }) as unknown as PlayerExtended;
     }
 
@@ -69,7 +63,7 @@ export const VideoPlayer: FC<VideoPlayerProps> = ({
     // videoRef.current?.classList.add('vjs-waiting');
     // setTimeout(() => videoRef.current?.classList.remove('vjs-waiting'), 1000);
     syncEngine?.registerPlayerRef(videoRef, playerRef);
-  }, [syncEngine, subtitles, video, thumbnail_url]);
+  }, [syncEngine, subtitles, video, thumbnailUrl]);
 
   useEffect(() => {
     const player = playerRef.current;
@@ -87,4 +81,4 @@ export const VideoPlayer: FC<VideoPlayerProps> = ({
       <Box ref={videoRef} />
     </Box>
   );
-};
+}
