@@ -74,4 +74,16 @@ export default class SessionRepository {
     );
     if (updateErr) throw new APP_ERRORS.UNEXPECTED_DATABASE_ERROR().causedBy(updateErr);
   }
+
+  /**
+   * Deletes a given entry with matching session token from the database
+   * @throws {APP_ERRORS.UNEXPECTED_DATABASE_ERROR}
+   * @param sessionToken
+   */
+  async deleteSession(sessionToken: string) {
+    const [, deleteErr] = await etp(
+      this.liveVideoSyncDB.delete(SESSIONS_TABLE).where(eq(SESSIONS_TABLE.token, sessionToken)),
+    );
+    if (deleteErr) throw new APP_ERRORS.UNEXPECTED_DATABASE_ERROR().causedBy(deleteErr);
+  }
 }

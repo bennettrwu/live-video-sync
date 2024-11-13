@@ -40,6 +40,8 @@ export default class SessionService {
 
   /**
    * Gets the user id corresponding to given session token and refreshes the expiration of the session
+   * @throws {APP_ERRORS.VALID_SESSION_NOT_FOUND}
+   * @throws {APP_ERRORS.UNEXPECTED_DATABASE_ERROR}
    * @param sessionToken
    * @returns user id and new expiration date
    */
@@ -52,5 +54,14 @@ export default class SessionService {
     await this.sessionRepository.updateSessionExpiry(sessionToken, newExpiry);
 
     return {userId, newExpiry};
+  }
+
+  /**
+   * Invalidates a given session token
+   * @throws {APP_ERRORS.UNEXPECTED_DATABASE_ERROR}
+   * @param sessionToken
+   */
+  async invalidateUserSession(sessionToken: string) {
+    await this.sessionRepository.deleteSession(sessionToken);
   }
 }
