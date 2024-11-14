@@ -1,5 +1,5 @@
 import AccountsRepository from '@src/modules/accounts/repository/accounts.repository.js';
-import {beforeEach, describe, expect, it, vi, type Mocked} from 'vitest';
+import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
 import fakeClass from '../../../fake-class.js';
 import AccountsService from '@src/modules/accounts/services/accounts.service.js';
 import HashingService from '@shared/services/hashing.service.js';
@@ -12,10 +12,16 @@ interface LocalTestContext {
 }
 
 describe('Accounts service', () => {
+  const userId = 1;
+  const username = 'username';
+  const password = 'password';
+  const passwordHash = 'passwordHash';
+  const error1 = new Error('some error');
+  const error2 = new Error('some other error');
+
   beforeEach<LocalTestContext>(context => {
     context.accountsRepository = fakeClass(AccountsRepository);
     context.hashingService = fakeClass(HashingService);
-
     context.accountsService = new AccountsService(context.accountsRepository, context.hashingService);
   });
 
@@ -25,11 +31,6 @@ describe('Accounts service', () => {
       hashingService,
       accountsService,
     }) => {
-      const userId = 1;
-      const username = 'username';
-      const password = 'password';
-      const passwordHash = 'passwordHash';
-
       accountsRepository.createAccount.mockResolvedValueOnce(userId);
       hashingService.hashPassword.mockResolvedValueOnce(passwordHash);
 
@@ -41,9 +42,6 @@ describe('Accounts service', () => {
     });
 
     it<LocalTestContext>('bubbles up other errors', async ({hashingService, accountsRepository, accountsService}) => {
-      const error1 = new Error('some error');
-      const error2 = new Error('some other error');
-
       hashingService.hashPassword.mockRejectedValueOnce(error1);
       const createResult1 = accountsService.createNewAccount('username', 'password');
 
@@ -61,18 +59,14 @@ describe('Accounts service', () => {
       accountsRepository,
       accountsService,
     }) => {
-      const userId = 1;
-      const username = 'username';
-      const password = 'password';
-      const passwordHash = 'somehash';
-
       hashingService.verifyPassword.mockImplementation(
         async (pass, passHash) => pass === password && passHash === passwordHash,
       );
       accountsRepository.getAccountUsername.mockResolvedValue({userId, username, passwordHash});
 
-      await accountsService.validateAccountCredentials(username, password);
-      // Should not throw error if valid
+      const user = await accountsService.validateAccountCredentials(username, password);
+
+      expect(user).toBe(userId);
     });
 
     it<LocalTestContext>('rejects invalid account password', async ({
@@ -80,11 +74,6 @@ describe('Accounts service', () => {
       accountsRepository,
       accountsService,
     }) => {
-      const userId = 1;
-      const username = 'username';
-      const password = 'password';
-      const passwordHash = 'somehash';
-
       hashingService.verifyPassword.mockImplementation(
         async (pass, passHash) => pass === password && passHash === passwordHash,
       );
@@ -104,9 +93,6 @@ describe('Accounts service', () => {
     });
 
     it<LocalTestContext>('bubbles up other errors', async ({hashingService, accountsRepository, accountsService}) => {
-      const error1 = new Error('some error');
-      const error2 = new Error('some other error');
-
       accountsRepository.getAccountUsername.mockResolvedValue({userId: 1, username: 'username', passwordHash: 'hash'});
 
       hashingService.verifyPassword.mockRejectedValueOnce(error1);

@@ -5,10 +5,11 @@ import {describe, expect, it, vi} from 'vitest';
 vi.mock('argon2');
 
 describe('Hashing service', () => {
+  const password = 'some password';
+
   it('verifies valid passwords', async () => {
     vi.unmock('argon2');
     const hashingService = new HashingService();
-    const password = 'some password';
 
     const hash = await hashingService.hashPassword(password);
     const valid = await hashingService.verifyPassword(password, hash);
@@ -19,7 +20,6 @@ describe('Hashing service', () => {
   it('rejects invalid passwords', async () => {
     vi.unmock('argon2');
     const hashingService = new HashingService();
-    const password = 'some password';
 
     const hash = await hashingService.hashPassword(password);
     const valid = await hashingService.verifyPassword('invalid', hash);
