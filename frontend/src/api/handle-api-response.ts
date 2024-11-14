@@ -45,7 +45,6 @@ export default async function handleAPIResponse<S>(
 ): Promise<S | FailType | InvalidType | undefined> {
   try {
     const response = await apiRequest;
-    console.log('r', response);
     Value.Assert(successType, response.data);
     return response.data as S;
   } catch (error) {

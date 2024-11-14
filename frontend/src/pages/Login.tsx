@@ -65,7 +65,7 @@ export default function Login() {
           <TextInput label="Password" type="password" key={form.key('password')} {...form.getInputProps('password')} />
 
           <Group justify="flex-end" mt="md">
-            <Button type="submit" variant="gradient" loading={loading}>
+            <Button type="submit" variant="gradient" gradient={{from: 'blue', to: 'teal', deg: 90}} loading={loading}>
               Login
             </Button>
           </Group>

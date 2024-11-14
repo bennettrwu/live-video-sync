@@ -73,7 +73,7 @@ export default function Signup() {
           />
 
           <Group justify="flex-end" mt="md">
-            <Button type="submit" variant="gradient" loading={loading}>
+            <Button type="submit" variant="gradient" gradient={{from: 'blue', to: 'teal', deg: 90}} loading={loading}>
               Signup
             </Button>
           </Group>
