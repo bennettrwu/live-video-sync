@@ -1,3 +1,4 @@
+import path from 'path'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
@@ -6,6 +7,13 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'istanbul' // or 'v8'
+    },
+  },
+  resolve: {
+    alias: {
+      '@shared': path.resolve(__dirname, './src/shared'),
+      '@server': path.resolve(__dirname, './src/server'),
+      '@src': path.resolve(__dirname, './src/'),
     },
   },
 })
