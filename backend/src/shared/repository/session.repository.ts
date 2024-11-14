@@ -26,13 +26,11 @@ export default class SessionRepository {
     const [, insertErr] = await etp(this.liveVideoSyncDB.insert(SESSIONS_TABLE).values({token, userId, expires}));
 
     if (insertErr) {
-      if (insertErr instanceof pg.DatabaseError) {
-        if (insertErr.constraint === 'sessions_userId_accounts_userId_fk') {
-          throw new APP_ERRORS.USER_ID_NOT_FOUND(userId).causedBy(insertErr);
-        }
-        if (insertErr.constraint === 'sessions_pkey') {
-          throw new APP_ERRORS.DUPLICATE_SESSION_TOKEN().causedBy(insertErr);
-        }
+      if (insertErr instanceof pg.DatabaseError && insertErr.constraint === 'sessions_userId_accounts_userId_fk') {
+        throw new APP_ERRORS.USER_ID_NOT_FOUND(userId).causedBy(insertErr);
+      }
+      if (insertErr instanceof pg.DatabaseError && insertErr.constraint === 'sessions_pkey') {
+        throw new APP_ERRORS.DUPLICATE_SESSION_TOKEN().causedBy(insertErr);
       }
       throw new APP_ERRORS.UNEXPECTED_DATABASE_ERROR().causedBy(insertErr);
     }

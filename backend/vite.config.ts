@@ -6,7 +6,8 @@ export default defineConfig({
     include: ['./test/**/*.test.ts'],
     coverage: {
       enabled: true,
-      provider: 'istanbul' // or 'v8'
+      provider: 'istanbul', // or 'v8'
+      include: ['src'],
     },
   },
   resolve: {

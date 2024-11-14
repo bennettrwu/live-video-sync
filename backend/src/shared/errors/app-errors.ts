@@ -30,9 +30,6 @@ export class AppError extends Error {
  * @returns custom app error class
  */
 export function createAppError(code: string, messageTemplate: string, isOperational: boolean) {
-  if (!code) throw new Error('App error code must not be empty');
-  if (!messageTemplate) throw new Error('App error message must not be empty');
-
   return class CustomAppError extends AppError {
     constructor(...args: Array<unknown>) {
       super();
