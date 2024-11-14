@@ -4,20 +4,25 @@ import SessionRepository from '@shared/repository/session.repository.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import type {LiveVideoSyncDB} from '@shared/live-video-sync-db/live-video-sync-db.js';
 import {useTestDb} from '../../use-test-db.js';
+import fakeDrizzelError from '../../fake-drizzle-error.js';
 
 interface LocalTestContext {
   userIds: number[];
   sessionRepository: SessionRepository;
 }
 
-async function checkSessions(db: LiveVideoSyncDB, expected: Array<{userId: number; token: string; expires: Date}>) {
+async function checkSessions(
+  db: LiveVideoSyncDB,
+  expected: Array<{userId: number; token: string; expires: Date}>,
+  message?: string,
+) {
   const sessions = await db.select().from(SESSIONS_TABLE).orderBy(SESSIONS_TABLE.token);
 
-  expect(sessions.length).toBe(expected.length);
+  expect(sessions.length, message).toBe(expected.length);
   for (let i = 0; i < expected.length; i++) {
-    expect(sessions[0].token).toBe(expected[0].token);
-    expect(sessions[0].userId).toBe(expected[0].userId);
-    expect(Math.abs(sessions[0].expires.getTime() - expected[0].expires.getTime())).toBeLessThan(1_000); // up to 1 sec off
+    expect(sessions[0].token, message).toBe(expected[0].token);
+    expect(sessions[0].userId, message).toBe(expected[0].userId);
+    expect(Math.abs(sessions[0].expires.getTime() - expected[0].expires.getTime()), message).toBeLessThan(1_000); // up to 1 sec off
   }
 }
 
@@ -64,7 +69,7 @@ describe('Session repository', () => {
       const saveResult = sessionRepository.saveSessionToken(invalidUserId, 'sessionToken', futureDate);
 
       await expect(saveResult).rejects.toThrowError(APP_ERRORS.USER_ID_NOT_FOUND);
-      await checkSessions(db, []);
+      await checkSessions(db, [], 'database to be unchanged');
     });
 
     it<LocalTestContext>('rejects duplicate session keys', async ({db, userIds, sessionRepository}) => {
@@ -75,19 +80,11 @@ describe('Session repository', () => {
       const saveResult = sessionRepository.saveSessionToken(userIds[1], token, futureDate);
 
       await expect(saveResult).rejects.toThrowError(APP_ERRORS.DUPLICATE_SESSION_TOKEN);
-      await checkSessions(db, [{userId: userIds[0], token, expires: futureDate}]);
+      await checkSessions(db, [{userId: userIds[0], token, expires: futureDate}], 'database to be unchanged');
     });
 
     it<LocalTestContext>('wraps unexpected errors', async ({userIds}) => {
-      const sessionRepository = new SessionRepository({
-        insert: () => {
-          return {
-            values: () => {
-              return new Promise((resolve, reject) => reject(new Error('Something unexpected')));
-            },
-          };
-        },
-      } as unknown as LiveVideoSyncDB);
+      const sessionRepository = new SessionRepository(fakeDrizzelError(['insert', 'values']));
 
       const futureDate = new Date(Date.now() + 60_000);
       const token = 'sessionToken';
@@ -126,19 +123,7 @@ describe('Session repository', () => {
     });
 
     it<LocalTestContext>('wraps unexpected errors', async () => {
-      const sessionRepository = new SessionRepository({
-        select: () => {
-          return {
-            from: () => {
-              return {
-                where: () => {
-                  return new Promise((resolve, reject) => reject(new Error('Something unexpected')));
-                },
-              };
-            },
-          };
-        },
-      } as unknown as LiveVideoSyncDB);
+      const sessionRepository = new SessionRepository(fakeDrizzelError(['select', 'from', 'where']));
 
       const saveResult = sessionRepository.getValidSession('sessionToken');
 
@@ -165,19 +150,7 @@ describe('Session repository', () => {
     });
 
     it<LocalTestContext>('wraps unexpected errors', async () => {
-      const sessionRepository = new SessionRepository({
-        update: () => {
-          return {
-            set: () => {
-              return {
-                where: () => {
-                  return new Promise((resolve, reject) => reject(new Error('Something unexpected')));
-                },
-              };
-            },
-          };
-        },
-      } as unknown as LiveVideoSyncDB);
+      const sessionRepository = new SessionRepository(fakeDrizzelError(['update', 'set', 'where']));
 
       const saveResult = sessionRepository.updateSessionExpiry('sessionToken', new Date());
 
@@ -200,15 +173,7 @@ describe('Session repository', () => {
     });
 
     it<LocalTestContext>('wraps unexpected errors', async () => {
-      const sessionRepository = new SessionRepository({
-        delete: () => {
-          return {
-            where: () => {
-              return new Promise((resolve, reject) => reject(new Error('Something unexpected')));
-            },
-          };
-        },
-      } as unknown as LiveVideoSyncDB);
+      const sessionRepository = new SessionRepository(fakeDrizzelError(['delete', 'where']));
 
       const saveResult = sessionRepository.deleteSession('sessionToken');
 
