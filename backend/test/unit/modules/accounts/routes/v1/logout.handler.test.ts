@@ -1,5 +1,4 @@
 import SessionService from '@shared/services/session.service.js';
-import AccountsService from '@src/modules/accounts/services/accounts.service.js';
 import {checkErrorResponse, checkSuccessResponse} from '@test/unit/utils/check-response.js';
 import fakeClass from '@test/unit/utils/fake-class.js';
 import useTestFastifyInstance, {type FastifyTestContext} from '@test/unit/utils/use-test-fastify-instance.js';
@@ -8,7 +7,6 @@ import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
 import checkSessionCookie from '../check-session-cookie.js';
 
 interface LocalTestContext extends FastifyTestContext {
-  accountsService: Mocked<AccountsService>;
   sessionService: Mocked<SessionService>;
 }
 
