@@ -61,7 +61,9 @@ export default fastifyPlugin((fastify: AppFastifyInstance) => {
       if (getErr instanceof APP_ERRORS.VALID_SESSION_NOT_FOUND) {
         throw new HTTP_ERRORS.UNAUTHORIZED('Session expired. Please log in again.');
       }
-      throw getErr;
+      throw new HTTP_ERRORS.INTERNAL_SERVER_ERROR(
+        'Something went wrong on our end checking your session. Please try again later.',
+      ).causedBy(getErr);
     }
 
     reply.setCookie('sessionToken', sessionToken, {
