@@ -3,8 +3,8 @@ import {ACCOUNTS_TABLE, SESSIONS_TABLE} from '@shared/live-video-sync-db/live-vi
 import SessionRepository from '@shared/repository/session.repository.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import type {LiveVideoSyncDB} from '@shared/live-video-sync-db/live-video-sync-db.js';
-import {useTestDb} from '../../use-test-db.js';
-import fakeDrizzelError from '../../fake-drizzle-error.js';
+import {useTestDb} from '@test/unit/utils/use-test-db.js';
+import fakeDrizzelError from '@test/unit/utils/fake-drizzle-error.js';
 
 interface LocalTestContext {
   sessionRepository: SessionRepository;

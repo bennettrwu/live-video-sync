@@ -1,5 +1,5 @@
 import type {FastifyReply, FastifyRequest} from 'fastify';
-import {HTTP_ERRORS} from '../shared/errors/http-errors.js';
+import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 
 /**
  * Custom handler for fastify not found errors to log error and return response in consistent format

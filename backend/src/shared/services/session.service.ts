@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import {errorTuplePromise as etp} from '../utils/errorTuple.js';
-import {APP_ERRORS} from '../errors/app-errors.js';
+import {errorTuplePromise as etp} from '@shared/utils/errorTuple.js';
+import {APP_ERRORS} from '@shared/errors/app-errors.js';
 
 declare global {
   export interface Dependencies {

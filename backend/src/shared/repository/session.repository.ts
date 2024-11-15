@@ -1,5 +1,5 @@
 import pg from 'pg';
-import {SESSIONS_TABLE, SESSIONS_VIEW} from '../live-video-sync-db/live-video-sync-db.schema.js';
+import {SESSIONS_TABLE, SESSIONS_VIEW} from '@shared/live-video-sync-db/live-video-sync-db.schema.js';
 import {errorTuplePromise as etp} from '@shared/utils/errorTuple.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import {eq} from 'drizzle-orm';

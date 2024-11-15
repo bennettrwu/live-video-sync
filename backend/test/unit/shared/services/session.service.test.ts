@@ -4,9 +4,9 @@ import type {ConfigType} from '@src/config/config.js';
 import {beforeEach, describe, expect, it, vi, type Mocked} from 'vitest';
 import crypto from 'crypto';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
-import fakeClass from '../../fake-class.js';
-import type {Writeable} from '../../fake-config.js';
-import fakeConfig from '../../fake-config.js';
+import fakeClass from '@test/unit/utils/fake-class.js';
+import type {Writeable} from '@test/unit/utils/fake-config.js';
+import fakeConfig from '@test/unit/utils/fake-config.js';
 
 interface LocalTestContext {
   crypto: typeof crypto;

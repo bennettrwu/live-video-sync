@@ -30,7 +30,7 @@ export function useTestDb() {
     const connectionString = postgresContainer.getConnectionUri();
 
     db = drizzle(connectionString);
-    await migrate(db, {migrationsFolder: path.join(DIRNAME, '../../drizzle')});
+    await migrate(db, {migrationsFolder: path.join(DIRNAME, '../../../drizzle')});
   }, 60_000);
 
   beforeEach(context => {

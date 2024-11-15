@@ -17,25 +17,17 @@ export default async function createDependencyContainer(): Promise<AwilixContain
 
   registerBaseDependencies(dependencyContainer);
 
-  await dependencyContainer.loadModules(
-    [
-      path.join(DIRNAME, '../shared/**/*.service.js'),
-      path.join(DIRNAME, '../shared/**/*.repository.js'),
-      path.join(DIRNAME, '../modules/**/*.service.js'),
-      path.join(DIRNAME, '../modules/**/*.repository.js'),
-    ],
-    {
-      formatName: 'camelCase',
-      resolverOptions: {
-        register: asClass,
-        lifetime: Lifetime.SCOPED,
-        dispose: instance => {
-          if (typeof instance.dispose === 'function') instance.dispose();
-        },
+  await dependencyContainer.loadModules([path.join(DIRNAME, '../{shared,modules}/**/*.{service,repository}.{js,ts}')], {
+    formatName: 'camelCase',
+    resolverOptions: {
+      register: asClass,
+      lifetime: Lifetime.SCOPED,
+      dispose: instance => {
+        if (typeof instance.dispose === 'function') instance.dispose();
       },
-      esModules: true,
     },
-  );
+    esModules: true,
+  });
 
   return dependencyContainer;
 }

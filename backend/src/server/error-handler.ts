@@ -1,6 +1,6 @@
 import {FastifyReply, FastifyRequest} from 'fastify';
 import {HTTP_ERRORS, HttpError} from '@shared/errors/http-errors.js';
-import {APP_ERRORS, AppError} from '../shared/errors/app-errors.js';
+import {APP_ERRORS, AppError} from '@shared/errors/app-errors.js';
 
 /**
  * Custom fastify error handler to log errors and return response in consistent format

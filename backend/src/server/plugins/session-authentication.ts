@@ -1,9 +1,9 @@
 import fastifyPlugin from 'fastify-plugin';
 import {AppFastifyInstance} from '@shared/types/fastify.js';
 import type {FastifyReply, FastifyRequest} from 'fastify';
-import {HTTP_ERRORS} from '../../shared/errors/http-errors.js';
-import {errorTuplePromise as etp} from '../../shared/utils/errorTuple.js';
-import {APP_ERRORS} from '../../shared/errors/app-errors.js';
+import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
+import {errorTuplePromise as etp} from '@shared/utils/errorTuple.js';
+import {APP_ERRORS} from '@shared/errors/app-errors.js';
 
 declare module 'fastify' {
   // _userId property not included because it should be treated as private

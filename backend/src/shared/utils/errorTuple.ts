@@ -1,4 +1,4 @@
-import {APP_ERRORS} from '../errors/app-errors.js';
+import {APP_ERRORS} from '@shared/errors/app-errors.js';
 
 /**
  * Given a promise, returns a new promise that wraps the original that resolves to a tuple

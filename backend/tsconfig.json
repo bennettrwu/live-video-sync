@@ -18,8 +18,14 @@
       "@server/*": [
         "./src/server/*"
       ],
+      "@config/*": [
+        "./src/config/*"
+      ],
       "@src/*": [
         "./src/*"
+      ],
+      "@test/*": [
+        "./test/*"
       ]
     }
   },

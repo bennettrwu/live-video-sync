@@ -1,5 +1,5 @@
 import {asFunction, asValue, AwilixContainer} from 'awilix';
-import {CONFIG, ConfigType} from '../config/config.js';
+import {CONFIG, ConfigType} from '@config/config.js';
 import createLogger, {Logger} from '@shared/logger/logger.js';
 import liveVideoSyncDB, {LiveVideoSyncDB} from '@shared/live-video-sync-db/live-video-sync-db.js';
 

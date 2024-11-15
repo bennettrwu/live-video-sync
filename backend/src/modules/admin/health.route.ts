@@ -1,6 +1,6 @@
 import {AppFastifyInstance} from '@shared/types/fastify.js';
 import {Type} from '@sinclair/typebox';
-import {SHARED_REPLY_SCHEMA} from '../../server/schemas.js';
+import {SHARED_REPLY_SCHEMA} from '@server/schemas.js';
 
 export default async function healthRoute(fastify: AppFastifyInstance) {
   fastify.get(
