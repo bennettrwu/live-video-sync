@@ -1,4 +1,3 @@
-import accountsRoute from '@src/modules/accounts/routes/accounts.route.js';
 import {asValue} from 'awilix';
 import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
 import AccountsService from '@src/modules/accounts/services/accounts.service.js';
@@ -9,7 +8,7 @@ import type {FastifyTestContext} from '@test/unit/utils/use-test-fastify-instanc
 import useTestFastifyInstance from '@test/unit/utils/use-test-fastify-instance.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import checkSessionCookie from '../check-session-cookie.js';
-import {checkClientErrorResponse, checkSuccessResponse} from '@test/unit/utils/check-response.js';
+import {checkClientErrorResponse, checkErrorResponse, checkSuccessResponse} from '@test/unit/utils/check-response.js';
 
 interface LocalTestContext extends FastifyTestContext {
   accountsService: Mocked<AccountsService>;
@@ -34,8 +33,6 @@ describe('/accounts/v1/create handler', () => {
       accountsService: asValue(context.accountsService),
       sessionService: asValue(context.sessionService),
     });
-
-    context.fastify.register(accountsRoute);
   });
 
   it<LocalTestContext>('creates user account', async ({fastify, accountsService, sessionService}) => {
@@ -69,12 +66,8 @@ describe('/accounts/v1/create handler', () => {
     sessionService.createNewSession.mockRejectedValue(new Error('some error'));
 
     const response = await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
-    const responseBody = response.json();
 
-    expect(response.statusCode).toBe(500);
-    expect(responseBody.statusCode).toBe(500);
-    expect(responseBody.message).not.toBe('');
-    expect(responseBody.success).toBeFalsy();
+    checkErrorResponse(response, 500);
   });
 
   it<LocalTestContext>('rejects invalid username and/or passwords', async ({fastify, accountsService}) => {

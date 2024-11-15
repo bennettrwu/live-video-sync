@@ -58,7 +58,7 @@ export default function createServer(dependencyContainer: AwilixContainer<Depend
   fastify.register(fastifyAutoload, {
     dir: path.join(DIRNAME, '../modules'),
     dirNameRoutePrefix: false,
-    matchFilter: path => ['.route.js'].some(e => path.endsWith(e)),
+    matchFilter: path => ['.route.js', '.route.ts'].some(e => path.endsWith(e)),
   });
 
   return fastify;

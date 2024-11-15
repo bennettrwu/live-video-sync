@@ -32,6 +32,7 @@ export const LOGIN_ACCOUNT_SCHEMA = {
       {description: 'Successfully logged into account'},
     ),
     400: SHARED_REPLY_SCHEMA[400],
+    401: SHARED_REPLY_SCHEMA[401],
     500: SHARED_REPLY_SCHEMA[500],
   },
 };
