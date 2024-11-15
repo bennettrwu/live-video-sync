@@ -2,7 +2,7 @@ CREATE TYPE "public"."upload_status" AS ENUM('uploading', 'uploadFailed', 'parsi
 CREATE TABLE IF NOT EXISTS "accounts" (
 	"userId" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "accounts_userId_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"passwordHash" varchar(256) NOT NULL,
-	"username" varchar(256) NOT NULL,
+	"username" varchar(16) NOT NULL,
 	CONSTRAINT "accounts_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint

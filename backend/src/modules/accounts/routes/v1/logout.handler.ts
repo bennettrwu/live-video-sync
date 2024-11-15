@@ -10,6 +10,7 @@ export const LOGOUT_ACCOUNT_SCHEMA = {
   response: {
     200: Type.Object(
       {
+        statusCode: Type.Literal(200),
         success: Type.Literal(true),
       },
       {description: 'Successfully logged out of account'},
@@ -32,10 +33,10 @@ export async function logoutAccountHandler(
   const sessionService = req.diScope.resolve('sessionService');
 
   const sessionCookie = req.cookies['sessionToken'];
-  if (sessionCookie === undefined) return reply.code(200).send({success: true});
+  if (sessionCookie === undefined) return reply.code(200).send({statusCode: 200, success: true});
 
   const {valid, value: sessionToken} = req.unsignCookie(sessionCookie);
-  if (!valid) return reply.code(200).send({success: true});
+  if (!valid) return reply.code(200).send({statusCode: 200, success: true});
 
   const [, deleteErr] = await etp(sessionService.invalidateUserSession(sessionToken));
   if (deleteErr) return errorHandler(deleteErr);
@@ -48,5 +49,5 @@ export async function logoutAccountHandler(
     sameSite: 'strict',
   });
 
-  return reply.code(200).send({success: true});
+  return reply.code(200).send({statusCode: 200, success: true});
 }

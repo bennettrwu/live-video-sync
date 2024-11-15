@@ -1,4 +1,4 @@
-import {APP_ERRORS} from '../../../shared/errors/app-errors.js';
+import {APP_ERRORS} from '@shared/errors/app-errors.js';
 
 declare global {
   interface Dependencies {
@@ -11,6 +11,22 @@ export default class AccountsService {
     private accountsRepository: Dependencies['accountsRepository'],
     private hashingService: Dependencies['hashingService'],
   ) {}
+
+  /**
+   * Checks if a given username is valid to use
+   * INVALID_USERNAME error will contain reason for rejection
+   * @throws {APP_ERRORS.INVALID_USERNAME}
+   * @param username
+   */
+  isValidUsername(username: string) {
+    if (username.length > 16 || username.length < 1) {
+      throw new APP_ERRORS.INVALID_USERNAME('Username must be between 1 and 16 characters long.');
+    }
+    if (!/^[\x20-\xFF]*$/.test(username)) {
+      throw new APP_ERRORS.INVALID_USERNAME('Username can only contain ASCII characters.');
+    }
+    if (/\s/u.test(username)) throw new APP_ERRORS.INVALID_USERNAME('Username cannot contain spaces.');
+  }
 
   /**
    * Creates a new user account with given credentials

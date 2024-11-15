@@ -25,6 +25,26 @@ describe('Accounts service', () => {
     context.accountsService = new AccountsService(context.accountsRepository, context.hashingService);
   });
 
+  describe('Checking usernames', () => {
+    it<LocalTestContext>('accepts valid username', ({accountsService}) => {
+      expect(() => accountsService.isValidUsername('a')).not.toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('0123456701234567')).not.toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('_s0m$-user*n@me_')).not.toThrow(APP_ERRORS.INVALID_USERNAME);
+    });
+
+    it<LocalTestContext>('rejects invalid usernames', ({accountsService}) => {
+      expect(() => accountsService.isValidUsername('')).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('1'.repeat(17))).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername(' ')).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('😎')).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('\r')).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('\n')).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('\t')).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('\f')).toThrow(APP_ERRORS.INVALID_USERNAME);
+      expect(() => accountsService.isValidUsername('\v')).toThrow(APP_ERRORS.INVALID_USERNAME);
+    });
+  });
+
   describe('Creating accounts', () => {
     it<LocalTestContext>('hashes password and saves account to database', async ({
       accountsRepository,

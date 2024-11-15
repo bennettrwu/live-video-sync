@@ -78,6 +78,8 @@ export const APP_ERRORS = Object.freeze({
 
   UNEXPECTED_DATABASE_ERROR: createAppError('UNEXPECTED_DATABASE_ERROR', 'An unexpected database error occured', false),
 
+  INVALID_USERNAME: createAppError('INVALID_USERNAME', '%s', false),
+
   PASSWORD_HASH_ERROR: createAppError('PASSWORD_HASH_ERROR', 'Unexpected failure when hashing password', false),
 
   PASSWORD_VERIFY_ERROR: createAppError('PASSWORD_VERIFY_ERROR', 'Unexpected failure when verifying password', false),

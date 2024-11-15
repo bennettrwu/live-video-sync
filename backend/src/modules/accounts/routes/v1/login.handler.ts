@@ -12,8 +12,8 @@ export const LOGIN_ACCOUNT_SCHEMA = {
     {
       username: Type.String({
         minLength: 1,
-        maxLength: 256,
-        errorMessage: 'Username must be between 1 and 256 characters long.',
+        maxLength: 16,
+        errorMessage: 'Username must be between 1 and 16 characters long and should not contain any whitespace.',
       }),
       password: Type.String({
         minLength: 8,
@@ -26,6 +26,7 @@ export const LOGIN_ACCOUNT_SCHEMA = {
   response: {
     200: Type.Object(
       {
+        statusCode: Type.Literal(200),
         success: Type.Literal(true),
       },
       {description: 'Successfully logged into account'},
@@ -70,5 +71,5 @@ export async function loginAccountHandler(
     sameSite: 'strict',
   });
 
-  return reply.code(200).send({success: true});
+  return reply.code(200).send({statusCode: 200, success: true});
 }

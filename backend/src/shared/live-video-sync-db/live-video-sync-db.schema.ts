@@ -19,7 +19,7 @@ export const ACCOUNTS_TABLE = pgTable(
   {
     userId: integer().primaryKey().generatedAlwaysAsIdentity(),
     passwordHash: varchar({length: 256}).notNull(),
-    username: varchar({length: 256}).notNull().unique(),
+    username: varchar({length: 16}).notNull().unique(),
   },
   table => [uniqueIndex('accountsUsernameIndex').on(table.username)],
 );

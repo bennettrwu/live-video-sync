@@ -3,7 +3,7 @@ import {AppFastifyReply, AppFastifyRequest} from '@shared/types/fastify.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import {SHARED_REPLY_SCHEMA} from '@server/schemas.js';
-import {errorTuplePromise as etp} from '@shared/utils/errorTuple.js';
+import {errorTupleFunction as etf, errorTuplePromise as etp} from '@shared/utils/errorTuple.js';
 
 export const CREATE_ACCOUNT_SCHEMA = {
   description: 'Create a new user account',
@@ -12,8 +12,8 @@ export const CREATE_ACCOUNT_SCHEMA = {
     {
       username: Type.String({
         minLength: 1,
-        maxLength: 256,
-        errorMessage: 'Username must be between 1 and 256 characters long.',
+        maxLength: 16,
+        errorMessage: 'Username must be between 1 and 16 characters long.',
       }),
       password: Type.String({
         minLength: 8,
@@ -26,6 +26,7 @@ export const CREATE_ACCOUNT_SCHEMA = {
   response: {
     201: Type.Object(
       {
+        statusCode: Type.Literal(201),
         success: Type.Literal(true),
       },
       {description: 'Successfully created account'},
@@ -36,6 +37,10 @@ export const CREATE_ACCOUNT_SCHEMA = {
 };
 
 function errorHandler(error: Error) {
+  if (error instanceof APP_ERRORS.INVALID_USERNAME) {
+    throw new HTTP_ERRORS.BAD_REQUEST([{message: error.message, key: '/body/username'}]);
+  }
+
   if (error instanceof APP_ERRORS.DUPLICATE_USERNAME) {
     throw new HTTP_ERRORS.BAD_REQUEST([
       {message: 'An account with given username already exists.', key: '/body/username'},
@@ -56,6 +61,9 @@ export async function createAccountHandler(
   const accountsService = req.diScope.resolve('accountsService');
   const sessionService = req.diScope.resolve('sessionService');
 
+  const [, validErr] = etf(accountsService.isValidUsername, username);
+  if (validErr) return errorHandler(validErr);
+
   const [account, createErr] = await etp(accountsService.createNewAccount(username, password));
   if (createErr) return errorHandler(createErr);
 
@@ -70,5 +78,5 @@ export async function createAccountHandler(
     sameSite: 'strict',
   });
 
-  return reply.code(201).send({success: true});
+  return reply.code(201).send({success: true, statusCode: 201});
 }
