@@ -21,7 +21,7 @@ describe('/accounts/v1/logout handler', () => {
     context.container.register({sessionService: asValue(context.sessionService)});
   });
 
-  it<LocalTestContext>('invalidates user session', async ({fastify, sessionService, getSessionTokenMock}) => {
+  it<LocalTestContext>('invalidates user session', async ({fastify, config, sessionService, getSessionTokenMock}) => {
     getSessionTokenMock.mockReturnValue(token);
 
     const response = await fastify.inject({
@@ -32,7 +32,7 @@ describe('/accounts/v1/logout handler', () => {
 
     expect(sessionService.invalidateUserSession).toHaveBeenCalledWith(token);
     checkSuccessResponse(response, 200);
-    checkSessionCookie(response.cookies[0], '', new Date(0));
+    checkSessionCookie(response.cookies[0], '', new Date(0), config.server.cookieSigningKey);
   });
 
   it<LocalTestContext>('converts unexpected errors to 500 http error', async ({fastify, sessionService}) => {

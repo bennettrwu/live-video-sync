@@ -33,7 +33,7 @@ describe('/accounts/v1/login handler', () => {
     });
   });
 
-  it<LocalTestContext>('logs user in', async ({fastify, accountsService, sessionService}) => {
+  it<LocalTestContext>('logs user in', async ({fastify, config, accountsService, sessionService}) => {
     accountsService.validateAccountCredentials.mockResolvedValue(userId);
     sessionService.createNewSession.mockResolvedValue({token, expires});
 
@@ -42,7 +42,7 @@ describe('/accounts/v1/login handler', () => {
     expect(accountsService.validateAccountCredentials).toHaveBeenCalledWith(username, password);
     expect(sessionService.createNewSession).toHaveBeenCalledWith(userId);
     checkSuccessResponse(response, 200);
-    checkSessionCookie(response.cookies[0], token, expires);
+    checkSessionCookie(response.cookies[0], token, expires, config.server.cookieSigningKey);
   });
 
   it<LocalTestContext>('reject invalid credentials', async ({fastify, accountsService}) => {

@@ -33,7 +33,7 @@ describe('/accounts/v1/create handler', () => {
     });
   });
 
-  it<LocalTestContext>('creates user account', async ({fastify, accountsService, sessionService}) => {
+  it<LocalTestContext>('creates user account', async ({fastify, config, accountsService, sessionService}) => {
     accountsService.createNewAccount.mockImplementation(async uname => {
       return {userId, username: uname, passwordHash: 'somehash'};
     });
@@ -44,7 +44,7 @@ describe('/accounts/v1/create handler', () => {
     expect(accountsService.createNewAccount).toHaveBeenCalledWith(username, password);
     expect(sessionService.createNewSession).toHaveBeenCalledWith(userId);
     checkSuccessResponse(response, 201);
-    checkSessionCookie(response.cookies[0], token, expires);
+    checkSessionCookie(response.cookies[0], token, expires, config.server.cookieSigningKey);
   });
 
   it<LocalTestContext>('rejects duplicate accounts', async ({fastify, accountsService}) => {

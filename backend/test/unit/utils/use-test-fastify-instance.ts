@@ -44,10 +44,10 @@ export default function useTestFastifyInstance(context: FastifyTestContext) {
   context.getSessionTokenMock = GET_TOKEN_MOCK;
 
   context.logger = fakeLogger();
-  context.config = fakeConfig({});
+  context.config = fakeConfig({server: {cookieSigningKey: 'cookieSecret'}});
   context.container = createContainer();
   context.container.register({
-    logger: asValue(context.logger as unknown as Logger),
+    logger: asValue(context.logger),
     config: asValue(context.config),
   });
 
