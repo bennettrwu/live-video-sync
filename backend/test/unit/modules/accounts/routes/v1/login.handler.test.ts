@@ -2,7 +2,6 @@ import {asValue} from 'awilix';
 import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
 import AccountsService from '@src/modules/accounts/services/accounts.service.js';
 import SessionService from '@shared/services/session.service.js';
-import type {AppFastifyInstance} from '@shared/types/fastify.js';
 import fakeClass from '@test/unit/utils/fake-class.js';
 import type {FastifyTestContext} from '@test/unit/utils/use-test-fastify-instance.js';
 import useTestFastifyInstance from '@test/unit/utils/use-test-fastify-instance.js';
@@ -13,7 +12,6 @@ import {checkErrorResponse, checkSuccessResponse} from '@test/unit/utils/check-r
 interface LocalTestContext extends FastifyTestContext {
   accountsService: Mocked<AccountsService>;
   sessionService: Mocked<SessionService>;
-  fastify: AppFastifyInstance;
 }
 
 describe('/accounts/v1/login handler', () => {

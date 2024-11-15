@@ -16,7 +16,7 @@ export default fastifyPlugin(async (fastify: AppFastifyInstance) => {
       info: {
         title: 'Live Video Sync API',
         description: 'The Swagger API documentation for Live Video Sync API.',
-        version: process.env.npm_package_version ?? '0.0.0',
+        version: '0.0.0',
       },
       tags: [
         {name: 'Accounts', description: 'Account management related endpoints'},

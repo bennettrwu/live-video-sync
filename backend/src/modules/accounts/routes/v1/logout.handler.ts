@@ -7,6 +7,7 @@ import {errorTuplePromise as etp} from '@shared/utils/errorTuple.js';
 export const LOGOUT_ACCOUNT_SCHEMA = {
   description: 'Login to an existing user account',
   tags: ['Accounts'],
+  security: [{sessionToken: []}],
   response: {
     200: Type.Object(
       {
@@ -15,8 +16,9 @@ export const LOGOUT_ACCOUNT_SCHEMA = {
       },
       {description: 'Successfully logged out of account'},
     ),
-    400: SHARED_REPLY_SCHEMA['400'],
-    450: SHARED_REPLY_SCHEMA['500'],
+    400: SHARED_REPLY_SCHEMA[400],
+    401: SHARED_REPLY_SCHEMA[401],
+    500: SHARED_REPLY_SCHEMA[500],
   },
 };
 
@@ -32,13 +34,7 @@ export async function logoutAccountHandler(
 ) {
   const sessionService = req.diScope.resolve('sessionService');
 
-  const sessionCookie = req.cookies['sessionToken'];
-  if (sessionCookie === undefined) return reply.code(200).send({statusCode: 200, success: true});
-
-  const {valid, value: sessionToken} = req.unsignCookie(sessionCookie);
-  if (!valid) return reply.code(200).send({statusCode: 200, success: true});
-
-  const [, deleteErr] = await etp(sessionService.invalidateUserSession(sessionToken));
+  const [, deleteErr] = await etp(sessionService.invalidateUserSession(req.getSessionToken()));
   if (deleteErr) return errorHandler(deleteErr);
 
   reply.setCookie('sessionToken', '', {

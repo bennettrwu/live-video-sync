@@ -9,11 +9,15 @@ export default async function accountsRoute(fastify: AppFastifyInstance) {
 
   fastify.post('/accounts/v1/login', {schema: LOGIN_ACCOUNT_SCHEMA}, loginAccountHandler);
 
+  fastify.post(
+    '/accounts/v1/logout',
+    {preHandler: [fastify.authenticate], schema: LOGOUT_ACCOUNT_SCHEMA},
+    logoutAccountHandler,
+  );
+
   fastify.get(
     '/accounts/v1/who-am-i',
     {preHandler: [fastify.authenticate], schema: WHO_AM_I_ACCOUNT_SCHEMA},
     whoAmIAccountHandler,
   );
-
-  fastify.post('/accounts/v1/logout', {schema: LOGOUT_ACCOUNT_SCHEMA}, logoutAccountHandler);
 }

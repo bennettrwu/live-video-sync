@@ -58,6 +58,12 @@ export const APP_ERRORS = Object.freeze({
     false,
   ),
 
+  NO_TOKEN_ON_UNAUTHENTICATED_ENDPOINT: createAppError(
+    'NO_TOKEN_ON_UNAUTHENTICATED_ENDPOINT',
+    'Cannot fetch session token on an unauthenticated endpoint. Did you add the authentication preHandler?',
+    false,
+  ),
+
   UNCAUGHT_NON_HTTP_ERROR: createAppError(
     'UNCAUGHT_NON_HTTP_ERROR',
     'An application error was thrown but not converted to HTTP error before reaching fastify error handler',
@@ -78,11 +84,11 @@ export const APP_ERRORS = Object.freeze({
 
   UNEXPECTED_DATABASE_ERROR: createAppError('UNEXPECTED_DATABASE_ERROR', 'An unexpected database error occured', false),
 
-  INVALID_USERNAME: createAppError('INVALID_USERNAME', '%s', false),
-
   PASSWORD_HASH_ERROR: createAppError('PASSWORD_HASH_ERROR', 'Unexpected failure when hashing password', false),
 
   PASSWORD_VERIFY_ERROR: createAppError('PASSWORD_VERIFY_ERROR', 'Unexpected failure when verifying password', false),
+
+  INVALID_USERNAME: createAppError('INVALID_USERNAME', '%s', true),
 
   DUPLICATE_USERNAME: createAppError('DUPLICATE_USERNAME', 'User with username "%s" already exists in database', true),
 

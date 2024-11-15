@@ -9,6 +9,7 @@ declare module 'fastify' {
   // _userId property not included because it should be treated as private
   interface FastifyRequest {
     getUserId: () => number;
+    getSessionToken: () => string;
   }
 
   interface FastifyInstance {
@@ -27,12 +28,19 @@ export default fastifyPlugin((fastify: AppFastifyInstance) => {
   // Decorate requests with _userId property which is use by the getUserId function
   // Should be treated as a private property and only fetched using getUserId() decorator
   fastify.decorateRequest('_userId', -1);
+  // Same thing for sessionToken
+  fastify.decorateRequest('_sessionToken', '');
 
   // No arrow function to keep req context
   fastify.decorateRequest('getUserId', function () {
     const userId = (this as unknown as {[key: string]: number})._userId;
     if (userId === -1) throw new APP_ERRORS.NO_USER_ID_ON_UNAUTHENTICATED_ENDPOINT();
     return userId;
+  });
+  fastify.decorateRequest('getSessionToken', function () {
+    const sessionToken = (this as unknown as {[key: string]: string})._sessionToken;
+    if (sessionToken === '') throw new APP_ERRORS.NO_TOKEN_ON_UNAUTHENTICATED_ENDPOINT();
+    return sessionToken;
   });
 
   // Checks users session cookie and determines if it is valid
@@ -64,5 +72,6 @@ export default fastifyPlugin((fastify: AppFastifyInstance) => {
       sameSite: 'strict',
     });
     (req as unknown as {[key: string]: number})._userId = getRes.userId;
+    (req as unknown as {[key: string]: string})._sessionToken = sessionToken;
   });
 });

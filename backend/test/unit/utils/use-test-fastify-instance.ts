@@ -15,10 +15,12 @@ export interface FastifyTestContext {
   fastify: AppFastifyInstance;
   authenticationMock: Mock;
   getUserIdMock: Mock;
+  getSessionTokenMock: Mock;
 }
 
-const AUTH_MOCK = vi.fn();
-const GET_MOCK = vi.fn();
+const AUTH_MOCK = vi.fn().mockResolvedValue(undefined);
+const GET_UID_MOCK = vi.fn();
+const GET_TOKEN_MOCK = vi.fn();
 vi.mock('@server/plugins/session-authentication.js', async () => {
   return {
     autoConfig: false,
@@ -26,17 +28,20 @@ vi.mock('@server/plugins/session-authentication.js', async () => {
     autoPrefix: true,
     prefixOverride: false,
     default: fastifyPlugin(fastify => {
-      fastify.decorateRequest('getUserId', GET_MOCK);
+      fastify.decorateRequest('getUserId', GET_UID_MOCK);
+      fastify.decorateRequest('getSessionToken', GET_TOKEN_MOCK);
       fastify.decorate('authenticate', AUTH_MOCK);
     }),
   };
 });
 
 export default function useTestFastifyInstance(context: FastifyTestContext) {
-  AUTH_MOCK.mockReset();
-  GET_MOCK.mockReset();
+  AUTH_MOCK.mockReset().mockResolvedValue(undefined);
+  GET_UID_MOCK.mockReset();
+  GET_TOKEN_MOCK.mockReset();
   context.authenticationMock = AUTH_MOCK;
-  context.getUserIdMock = GET_MOCK;
+  context.getUserIdMock = GET_UID_MOCK;
+  context.getSessionTokenMock = GET_TOKEN_MOCK;
 
   context.logger = fakeLogger();
   context.config = fakeConfig({});
