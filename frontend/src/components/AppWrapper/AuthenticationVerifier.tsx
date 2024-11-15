@@ -49,6 +49,7 @@ export default function AuthenticationVerifier() {
                 'Something went wrong on our end when checking your session. Please refresh the page and try to login again.',
               message: `Request id: ${result.requestId}`,
               autoClose: false,
+              onClose: () => window.location.reload(),
             });
             return;
           }
