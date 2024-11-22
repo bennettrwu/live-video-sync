@@ -5,8 +5,8 @@ import {beforeEach, describe, expect, it, vi, type Mocked} from 'vitest';
 import crypto from 'crypto';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import fakeClass from '@test/unit/test-utils/fake-class.js';
-import type {Writeable} from '@test/unit/test-utils/fake-config.js';
 import fakeConfig from '@test/unit/test-utils/fake-config.js';
+import type {Writeable} from '@shared/types/writeable.js';
 
 interface LocalTestContext {
   crypto: typeof crypto;
