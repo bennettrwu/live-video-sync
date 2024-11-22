@@ -8,11 +8,12 @@ import type {ConfigType} from '@config/config.js';
 import fakeConfig from './fake-config.js';
 import {SetErrorFunction} from '@sinclair/typebox/errors';
 import type {RecursivePartial} from '@shared/types/recursive-partial.js';
+import type {Writeable} from '@shared/types/writeable.js';
 
 export interface FastifyTestContext extends TestContext {
   container: AwilixContainer<Mocked<Dependencies>>;
   fastify: FastifyInstance;
-  config: ConfigType;
+  config: Writeable<ConfigType>;
   typeValidatorErrorHandlerMock: Mock;
   getSessionTokenMock: Mock;
   errorHandlerMock: Mock;
