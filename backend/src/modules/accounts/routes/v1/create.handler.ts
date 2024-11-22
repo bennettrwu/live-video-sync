@@ -69,7 +69,7 @@ export async function createAccountHandler(
 
   const [session, newSessionErr] = await etp(sessionService.createNewSession(account.userId));
   if (newSessionErr) return errorHandler(newSessionErr);
-  console.log(reply.setCookie);
+
   reply.setCookie('sessionToken', session.token, {
     expires: session.expires,
     signed: true,
