@@ -1,7 +1,7 @@
-import fastifyCookie, {sign} from '@fastify/cookie';
+import {sign} from '@fastify/cookie';
 import sessionAuthentication from '@server/plugins/session-authentication.js';
-import { APP_ERRORS } from '@shared/errors/app-errors.js';
-import { HTTP_ERRORS } from '@shared/errors/http-errors.js';
+import {APP_ERRORS} from '@shared/errors/app-errors.js';
+import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import SessionService from '@shared/services/session.service.js';
 import fakeClass from '@test/unit/test-utils/fake-class.js';
 import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
