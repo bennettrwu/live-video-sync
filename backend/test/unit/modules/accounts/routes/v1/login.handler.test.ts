@@ -1,9 +1,10 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, type TestAPI} from 'vitest';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import checkSessionCookie from '../check-session-cookie.js';
 import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import setupAccountHandlerTests, {type AccountRoutesTestContext} from '../setup-account-handler-tests.js';
+import formatTestNames from '@test/unit/test-utils/format-test-names.js';
 
 describe('/accounts/v1/login handler', () => {
   setupAccountHandlerTests();
@@ -46,5 +47,21 @@ describe('/accounts/v1/login handler', () => {
     await fastify.inject({method: 'POST', url: '/accounts/v1/login', body: {username, password}});
 
     expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.INTERNAL_SERVER_ERROR);
+  });
+
+  (it as TestAPI<AccountRoutesTestContext>).for(
+    formatTestNames([
+      {},
+      {username: {}, password},
+      {username, password: {}},
+      {username: '', password},
+      {username: '1'.repeat(17), password},
+      {username, password: '1'.repeat(7)},
+      {name: 'very long password', username, password: '1'.repeat(257)},
+    ]),
+  )('rejects invalid request bodies: %s', async ([, body], {fastify, typeValidatorErrorHandlerMock}) => {
+    await fastify.inject({method: 'POST', url: '/accounts/v1/create', body});
+
+    expect(typeValidatorErrorHandlerMock).toHaveBeenCalled();
   });
 });

@@ -41,7 +41,6 @@ describe('/accounts/v1/create handler', () => {
 
     await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
 
-    expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
     checkBadRequestError(errorHandlerMock.mock.calls[0][0], ['/body/username']);
   });
 
@@ -66,7 +65,6 @@ describe('/accounts/v1/create handler', () => {
 
     await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
 
-    expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
     checkBadRequestError(errorHandlerMock.mock.calls[0][0], ['/body/username']);
   });
 
