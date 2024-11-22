@@ -1,4 +1,4 @@
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect} from 'vitest';
 import AccountsRepository from '@src/modules/accounts/repository/accounts.repository.js';
 import {ACCOUNTS_TABLE} from '@shared/live-video-sync-db/live-video-sync-db.schema.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
@@ -42,12 +42,12 @@ describe('Accounts repository', () => {
     ];
   });
 
-  describe('Creating accounts', async () => {
-    it<LocalTestContext>('creates new accounts', async ({db}) => {
+  describe<LocalTestContext>('Creating accounts', it => {
+    it('creates new accounts', async ({db}) => {
       await checkAccounts(db, initialAccountsDbState);
     });
 
-    it<LocalTestContext>('rejects duplicate usernames', async ({db, accountsRepository}) => {
+    it('rejects duplicate usernames', async ({db, accountsRepository}) => {
       const createResult = accountsRepository.createAccount(username2, passwordHash2);
 
       await expect(createResult).rejects.toThrow(APP_ERRORS.DUPLICATE_USERNAME);
@@ -55,7 +55,7 @@ describe('Accounts repository', () => {
       await checkAccounts(db, initialAccountsDbState);
     });
 
-    it<LocalTestContext>('wraps unexpected errors', async () => {
+    it('wraps unexpected errors', async () => {
       const accountsRepository = new AccountsRepository(fakeDrizzelError(['insert', 'values', 'returning']));
 
       const createResult = accountsRepository.createAccount('username', 'hash');
@@ -64,8 +64,8 @@ describe('Accounts repository', () => {
     });
   });
 
-  describe('Getting accounts by user id', () => {
-    it<LocalTestContext>('gets valid user accounts', async ({db, accountsRepository}) => {
+  describe<LocalTestContext>('Getting accounts by user id', it => {
+    it('gets valid user accounts', async ({db, accountsRepository}) => {
       const account1 = await accountsRepository.getAccountUserId(userId1);
       const account2 = await accountsRepository.getAccountUserId(userId2);
 
@@ -74,14 +74,14 @@ describe('Accounts repository', () => {
       await checkAccounts(db, initialAccountsDbState);
     });
 
-    it<LocalTestContext>('rejects fetching invalid user accounts', async ({db, accountsRepository}) => {
+    it('rejects fetching invalid user accounts', async ({db, accountsRepository}) => {
       const getResult = accountsRepository.getAccountUserId(Math.max(userId1, userId2) + 1);
 
       await expect(getResult).rejects.toThrow(APP_ERRORS.USER_ID_NOT_FOUND);
       await checkAccounts(db, initialAccountsDbState);
     });
 
-    it<LocalTestContext>('wraps unexpected errors', async () => {
+    it('wraps unexpected errors', async () => {
       const accountsRepository = new AccountsRepository(
         fakeDrizzelError(['select', 'from', 'where', 'limit'], new Error('something unexpected')),
       );
@@ -92,8 +92,8 @@ describe('Accounts repository', () => {
     });
   });
 
-  describe('Getting accounts by username', () => {
-    it<LocalTestContext>('gets valid user accounts', async ({db, accountsRepository}) => {
+  describe<LocalTestContext>('Getting accounts by username', it => {
+    it('gets valid user accounts', async ({db, accountsRepository}) => {
       const account1 = await accountsRepository.getAccountUsername(username1);
       const account2 = await accountsRepository.getAccountUsername(username2);
 
@@ -102,14 +102,14 @@ describe('Accounts repository', () => {
       await checkAccounts(db, initialAccountsDbState);
     });
 
-    it<LocalTestContext>('rejects fetching invalid user accounts', async ({db, accountsRepository}) => {
+    it('rejects fetching invalid user accounts', async ({db, accountsRepository}) => {
       const getResult = accountsRepository.getAccountUsername('not a user');
 
       await expect(getResult).rejects.toThrow(APP_ERRORS.USERNAME_NOT_FOUND);
       await checkAccounts(db, initialAccountsDbState);
     });
 
-    it<LocalTestContext>('wraps unexpected errors', async () => {
+    it('wraps unexpected errors', async () => {
       const accountsRepository = new AccountsRepository(fakeDrizzelError(['select', 'from', 'where', 'limit']));
 
       const createResult = accountsRepository.getAccountUsername('username');

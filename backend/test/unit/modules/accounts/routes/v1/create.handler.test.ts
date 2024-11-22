@@ -1,4 +1,4 @@
-import {describe, expect, it, type TestAPI} from 'vitest';
+import {describe, expect} from 'vitest';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import checkSessionCookie from '../check-session-cookie.js';
 import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
@@ -8,7 +8,7 @@ import formatTestNames from '@test/unit/test-utils/format-test-names.js';
 import type {AccountRoutesTestContext} from '../setup-account-handler-tests.js';
 import setupAccountHandlerTests from '../setup-account-handler-tests.js';
 
-describe('/accounts/v1/create handler', () => {
+describe<AccountRoutesTestContext>('/accounts/v1/create handler', it => {
   setupAccountHandlerTests();
 
   const userId = 1;
@@ -17,7 +17,7 @@ describe('/accounts/v1/create handler', () => {
   const token = 'someSessionToken';
   const expires = new Date();
 
-  it<AccountRoutesTestContext>('creates user account and returns session token in cookie', async ({
+  it('creates user account and returns session token in cookie', async ({
     fastify,
     config,
     accountsService,
@@ -36,7 +36,7 @@ describe('/accounts/v1/create handler', () => {
     expect(sessionService.createNewSession).toHaveBeenCalledWith(userId);
   });
 
-  it<AccountRoutesTestContext>('rejects duplicate accounts', async ({fastify, accountsService, errorHandlerMock}) => {
+  it('rejects duplicate accounts', async ({fastify, accountsService, errorHandlerMock}) => {
     accountsService.createNewAccount.mockRejectedValue(new APP_ERRORS.DUPLICATE_USERNAME());
 
     await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
@@ -44,7 +44,7 @@ describe('/accounts/v1/create handler', () => {
     checkBadRequestError(errorHandlerMock.mock.calls[0][0], ['/body/username']);
   });
 
-  it<AccountRoutesTestContext>('converts unexpected errors to 500 http error', async ({
+  it('converts unexpected errors to 500 http error', async ({
     fastify,
     accountsService,
     sessionService,
@@ -58,7 +58,7 @@ describe('/accounts/v1/create handler', () => {
     expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.INTERNAL_SERVER_ERROR);
   });
 
-  it<AccountRoutesTestContext>('rejects invalid usernames', async ({fastify, errorHandlerMock, accountsService}) => {
+  it('rejects invalid usernames', async ({fastify, errorHandlerMock, accountsService}) => {
     accountsService.isValidUsername.mockImplementation(() => {
       throw new APP_ERRORS.INVALID_USERNAME('invalid');
     });
@@ -68,7 +68,7 @@ describe('/accounts/v1/create handler', () => {
     checkBadRequestError(errorHandlerMock.mock.calls[0][0], ['/body/username']);
   });
 
-  (it as TestAPI<AccountRoutesTestContext>).for(
+  it.for(
     formatTestNames([
       {name: 'empty body', test: ''},
       {},

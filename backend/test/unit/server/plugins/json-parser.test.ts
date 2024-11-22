@@ -1,9 +1,9 @@
 import jsonParser from '@server/plugins/json-parser.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
-import {beforeEach, describe, expect, it, type TestAPI} from 'vitest';
+import {beforeEach, describe, expect} from 'vitest';
 
-describe('Json parser', () => {
+describe<FastifyTestContext>('Json parser', it => {
   useTestFastifyInstance();
 
   beforeEach<FastifyTestContext>(context => {
@@ -11,7 +11,7 @@ describe('Json parser', () => {
     context.fastify.register(f => f.post('/test', context.routeHandlerMock));
   });
 
-  (it as TestAPI<FastifyTestContext>).for(
+  it.for(
     [
       {jsonStr: 'null', jsonObj: null},
       {jsonStr: 'false', jsonObj: false},
@@ -77,19 +77,20 @@ describe('Json parser', () => {
     expect(routeHandlerMock.mock.calls[0][0].body).toEqual(jsonObj);
   });
 
-  (it as TestAPI<FastifyTestContext>).for([
-    '',
-    'string',
-    'undefined',
-    '{ test: error }',
-    '[,]',
-    '{ "oops": "extra", "comma": "here", }',
-  ])('rejects invalid JSON: %s', async (jsonStr, {fastify, routeHandlerMock, errorHandlerMock}) => {
-    await fastify.inject({method: 'POST', url: '/test', headers: {'content-type': 'application/json'}, body: jsonStr});
+  it.for(['', 'string', 'undefined', '{ test: error }', '[,]', '{ "oops": "extra", "comma": "here", }'])(
+    'rejects invalid JSON: %s',
+    async (jsonStr, {fastify, routeHandlerMock, errorHandlerMock}) => {
+      await fastify.inject({
+        method: 'POST',
+        url: '/test',
+        headers: {'content-type': 'application/json'},
+        body: jsonStr,
+      });
 
-    expect(routeHandlerMock).not.toHaveBeenCalled();
-    expect(errorHandlerMock).toHaveBeenCalledOnce();
-    expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
-    expect(errorHandlerMock.mock.calls[0][0].requestErrors[0].key).toBe('/body');
-  });
+      expect(routeHandlerMock).not.toHaveBeenCalled();
+      expect(errorHandlerMock).toHaveBeenCalledOnce();
+      expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
+      expect(errorHandlerMock.mock.calls[0][0].requestErrors[0].key).toBe('/body');
+    },
+  );
 });

@@ -6,13 +6,13 @@ import SessionService from '@shared/services/session.service.js';
 import fakeClass from '@test/unit/test-utils/fake-class.js';
 import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
 import {asValue} from 'awilix';
-import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
+import {beforeEach, describe, expect, type Mocked} from 'vitest';
 
 interface LocalTestContext extends FastifyTestContext {
   sessionService: Mocked<SessionService>;
 }
 
-describe('Session authentication', () => {
+describe<LocalTestContext>('Session authentication', it => {
   const userId = 1;
   const newExpiry = new Date();
   const token = 'someToken';
@@ -31,7 +31,7 @@ describe('Session authentication', () => {
     context.container.register({sessionService: asValue(context.sessionService)});
   });
 
-  it<LocalTestContext>('accepts valid session token in cookie', async ({fastify, sessionService, routeHandlerMock}) => {
+  it('accepts valid session token in cookie', async ({fastify, sessionService, routeHandlerMock}) => {
     sessionService.getAndRefreshSession.mockResolvedValue({userId, newExpiry});
 
     await fastify.inject({method: 'GET', url: '/auth', cookies: {sessionToken: sign(token, cookieSecret)}});
@@ -40,7 +40,7 @@ describe('Session authentication', () => {
     expect(sessionService.getAndRefreshSession).toHaveBeenCalledWith(token);
   });
 
-  it<LocalTestContext>('rejects invalid cookie', async ({fastify, errorHandlerMock}) => {
+  it('rejects invalid cookie', async ({fastify, errorHandlerMock}) => {
     await fastify.inject({method: 'GET', url: '/auth'});
     expect(errorHandlerMock.mock.calls[0][0]).instanceOf(HTTP_ERRORS.UNAUTHORIZED);
 
@@ -50,7 +50,7 @@ describe('Session authentication', () => {
     expect(errorHandlerMock.mock.calls[0][0]).instanceOf(HTTP_ERRORS.UNAUTHORIZED);
   });
 
-  it<LocalTestContext>('rejects invalid session token', async ({fastify, sessionService, errorHandlerMock}) => {
+  it('rejects invalid session token', async ({fastify, sessionService, errorHandlerMock}) => {
     sessionService.getAndRefreshSession.mockRejectedValue(new APP_ERRORS.VALID_SESSION_NOT_FOUND());
 
     await fastify.inject({method: 'GET', url: '/auth', cookies: {sessionToken: sign(token, cookieSecret)}});
@@ -59,11 +59,7 @@ describe('Session authentication', () => {
     expect(errorHandlerMock.mock.calls[0][0]).instanceOf(HTTP_ERRORS.UNAUTHORIZED);
   });
 
-  it<LocalTestContext>('converts unexpected errors to 500 http error', async ({
-    fastify,
-    sessionService,
-    errorHandlerMock,
-  }) => {
+  it('converts unexpected errors to 500 http error', async ({fastify, sessionService, errorHandlerMock}) => {
     sessionService.getAndRefreshSession.mockRejectedValue(new Error('some error'));
 
     await fastify.inject({method: 'GET', url: '/auth', cookies: {sessionToken: sign(token, cookieSecret)}});
@@ -72,11 +68,7 @@ describe('Session authentication', () => {
     expect(errorHandlerMock.mock.calls[0][0]).instanceOf(HTTP_ERRORS.INTERNAL_SERVER_ERROR);
   });
 
-  it<LocalTestContext>('provides user id and session token after logging in', async ({
-    fastify,
-    sessionService,
-    routeHandlerMock,
-  }) => {
+  it('provides user id and session token after logging in', async ({fastify, sessionService, routeHandlerMock}) => {
     sessionService.getAndRefreshSession.mockResolvedValue({userId, newExpiry});
 
     await fastify.inject({method: 'GET', url: '/auth', cookies: {sessionToken: sign(token, cookieSecret)}});
@@ -85,10 +77,7 @@ describe('Session authentication', () => {
     expect(routeHandlerMock.mock.calls[0][0].getSessionToken()).toBe(token);
   });
 
-  it<LocalTestContext>('rejects getUserId usage on endpoints without authentication', async ({
-    fastify,
-    routeHandlerMock,
-  }) => {
+  it('rejects getUserId usage on endpoints without authentication', async ({fastify, routeHandlerMock}) => {
     fastify.register(f => f.get('/test', routeHandlerMock));
 
     await fastify.inject({method: 'GET', url: '/test', cookies: {sessionToken: sign(token, cookieSecret)}});
@@ -98,10 +87,7 @@ describe('Session authentication', () => {
     );
   });
 
-  it<LocalTestContext>('rejects getSessionToken usage on endpoints without authentication', async ({
-    fastify,
-    routeHandlerMock,
-  }) => {
+  it('rejects getSessionToken usage on endpoints without authentication', async ({fastify, routeHandlerMock}) => {
     fastify.register(f => f.get('/test', routeHandlerMock));
 
     await fastify.inject({method: 'GET', url: '/test', cookies: {sessionToken: sign(token, cookieSecret)}});

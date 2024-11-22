@@ -1,5 +1,5 @@
 import AccountsRepository from '@src/modules/accounts/repository/accounts.repository.js';
-import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
+import {beforeEach, describe, expect, type Mocked} from 'vitest';
 import AccountsService from '@src/modules/accounts/services/accounts.service.js';
 import HashingService from '@shared/services/hashing.service.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
@@ -25,14 +25,14 @@ describe('Accounts service', () => {
     context.accountsService = new AccountsService(context.accountsRepository, context.hashingService);
   });
 
-  describe('Checking usernames', () => {
-    it<LocalTestContext>('accepts valid username', ({accountsService}) => {
+  describe<LocalTestContext>('Checking usernames', it => {
+    it('accepts valid username', ({accountsService}) => {
       expect(() => accountsService.isValidUsername('a')).not.toThrow(APP_ERRORS.INVALID_USERNAME);
       expect(() => accountsService.isValidUsername('0123456701234567')).not.toThrow(APP_ERRORS.INVALID_USERNAME);
       expect(() => accountsService.isValidUsername('_s0m$-user*n@me_')).not.toThrow(APP_ERRORS.INVALID_USERNAME);
     });
 
-    it<LocalTestContext>('rejects invalid usernames', ({accountsService}) => {
+    it('rejects invalid usernames', ({accountsService}) => {
       expect(() => accountsService.isValidUsername('')).toThrow(APP_ERRORS.INVALID_USERNAME);
       expect(() => accountsService.isValidUsername('1'.repeat(17))).toThrow(APP_ERRORS.INVALID_USERNAME);
       expect(() => accountsService.isValidUsername(' ')).toThrow(APP_ERRORS.INVALID_USERNAME);
@@ -45,8 +45,8 @@ describe('Accounts service', () => {
     });
   });
 
-  describe('Creating accounts', () => {
-    it<LocalTestContext>('hashes password and saves account to database', async ({
+  describe<LocalTestContext>('Creating accounts', it => {
+    it('hashes password and saves account to database', async ({
       accountsRepository,
       hashingService,
       accountsService,
@@ -61,7 +61,7 @@ describe('Accounts service', () => {
       expect(accountsRepository.createAccount).toHaveBeenCalledWith(username, passwordHash);
     });
 
-    it<LocalTestContext>('bubbles up other errors', async ({hashingService, accountsRepository, accountsService}) => {
+    it('bubbles up other errors', async ({hashingService, accountsRepository, accountsService}) => {
       hashingService.hashPassword.mockRejectedValueOnce(error1);
       const createResult1 = accountsService.createNewAccount('username', 'password');
 
@@ -73,12 +73,8 @@ describe('Accounts service', () => {
     });
   });
 
-  describe('Validating credentials', () => {
-    it<LocalTestContext>('accepts valid account credentials', async ({
-      hashingService,
-      accountsRepository,
-      accountsService,
-    }) => {
+  describe<LocalTestContext>('Validating credentials', it => {
+    it('accepts valid account credentials', async ({hashingService, accountsRepository, accountsService}) => {
       hashingService.verifyPassword.mockImplementation(
         async (pass, passHash) => pass === password && passHash === passwordHash,
       );
@@ -89,11 +85,7 @@ describe('Accounts service', () => {
       expect(user).toBe(userId);
     });
 
-    it<LocalTestContext>('rejects invalid account password', async ({
-      hashingService,
-      accountsRepository,
-      accountsService,
-    }) => {
+    it('rejects invalid account password', async ({hashingService, accountsRepository, accountsService}) => {
       hashingService.verifyPassword.mockImplementation(
         async (pass, passHash) => pass === password && passHash === passwordHash,
       );
@@ -104,7 +96,7 @@ describe('Accounts service', () => {
       await expect(validateResult).rejects.toThrow(APP_ERRORS.INVALID_ACCOUNT_CREDENTIALS);
     });
 
-    it<LocalTestContext>('rejects invalid account username', async ({accountsRepository, accountsService}) => {
+    it('rejects invalid account username', async ({accountsRepository, accountsService}) => {
       accountsRepository.getAccountUsername.mockRejectedValue(new APP_ERRORS.USERNAME_NOT_FOUND());
 
       const validateResult = accountsService.validateAccountCredentials('username', 'wrong password');
@@ -112,7 +104,7 @@ describe('Accounts service', () => {
       await expect(validateResult).rejects.toThrow(APP_ERRORS.USERNAME_NOT_FOUND);
     });
 
-    it<LocalTestContext>('bubbles up other errors', async ({hashingService, accountsRepository, accountsService}) => {
+    it('bubbles up other errors', async ({hashingService, accountsRepository, accountsService}) => {
       accountsRepository.getAccountUsername.mockResolvedValue({userId: 1, username: 'username', passwordHash: 'hash'});
 
       hashingService.verifyPassword.mockRejectedValueOnce(error1);

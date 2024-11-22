@@ -1,7 +1,7 @@
 import SessionRepository from '@shared/repository/session.repository.js';
 import SessionService from '@shared/services/session.service.js';
 import type {ConfigType} from '@src/config/config.js';
-import {beforeEach, describe, expect, it, vi, type Mocked} from 'vitest';
+import {beforeEach, describe, expect, vi, type Mocked} from 'vitest';
 import crypto from 'crypto';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import fakeClass from '@test/unit/test-utils/fake-class.js';
@@ -20,18 +20,7 @@ vi.mock('crypto');
 describe('Session service', () => {
   const userId = 0;
   const date = new Date(2024, 11, 14);
-  const tokens = [
-    'deadbeef',
-    'deadbef0',
-    'deadbef1',
-    'deadbef2',
-    'deadbef3',
-    'deadbef4',
-    'deadbef5',
-    'deadbef6',
-    'deadbef7',
-    'deadbef8',
-  ];
+  const tokens = ['abc0', 'abc1', 'abc2', 'abc3', 'abc4', 'abc5', 'abc6', 'abc7', 'abc8', 'abc9'];
   const defaultLoginSessionTTL = 60_000;
   const defaultExpectedExpires = new Date(date.getTime() + defaultLoginSessionTTL);
   const error1 = new Error('Some error');
@@ -48,8 +37,8 @@ describe('Session service', () => {
     context.sessionService = new SessionService(context.config, context.sessionRepository);
   });
 
-  describe('Creating sessions', () => {
-    it<LocalTestContext>('creates new user session', async ({crypto, sessionRepository, sessionService}) => {
+  describe<LocalTestContext>('Creating sessions', it => {
+    it('creates new user session', async ({crypto, sessionRepository, sessionService}) => {
       crypto.randomBytes = vi.fn().mockReturnValue(Buffer.from(tokens[0], 'hex'));
 
       const result = await sessionService.createNewSession(0);
@@ -59,7 +48,7 @@ describe('Session service', () => {
       expect(crypto.randomBytes).toHaveBeenCalledWith(32);
     });
 
-    it<LocalTestContext>('creates new user session with configured expiry', async ({
+    it('creates new user session with configured expiry', async ({
       crypto,
       config,
       sessionRepository,
@@ -78,11 +67,7 @@ describe('Session service', () => {
       expect(crypto.randomBytes).toHaveBeenCalledWith(32);
     });
 
-    it<LocalTestContext>('retries on session token conflict before erroring', async ({
-      crypto,
-      sessionRepository,
-      sessionService,
-    }) => {
+    it('retries on session token conflict before erroring', async ({crypto, sessionRepository, sessionService}) => {
       let cryptoMock = vi.fn();
       for (let i = 0; i < 10; i++) cryptoMock = cryptoMock.mockReturnValueOnce(Buffer.from(tokens[i], 'hex'));
       crypto.randomBytes = cryptoMock;
@@ -96,7 +81,7 @@ describe('Session service', () => {
       expect(crypto.randomBytes).toHaveBeenCalledWith(32);
     });
 
-    it<LocalTestContext>('bubbles up other errors', async ({sessionRepository, sessionService}) => {
+    it('bubbles up other errors', async ({sessionRepository, sessionService}) => {
       crypto.randomBytes = vi.fn().mockReturnValue(Buffer.from(tokens[0], 'hex'));
       sessionRepository.saveSessionToken.mockRejectedValue(error1);
 
@@ -106,8 +91,8 @@ describe('Session service', () => {
     });
   });
 
-  describe('Fetching and refreshing sessions', () => {
-    it<LocalTestContext>('gets user id of session and updates expiry', async ({sessionRepository, sessionService}) => {
+  describe<LocalTestContext>('Fetching and refreshing sessions', it => {
+    it('gets user id of session and updates expiry', async ({sessionRepository, sessionService}) => {
       sessionRepository.getValidSession.mockResolvedValue(userId);
 
       const result = await sessionService.getAndRefreshSession(tokens[0]);
@@ -117,11 +102,7 @@ describe('Session service', () => {
       expect(sessionRepository.updateSessionExpiry).toHaveBeenCalledWith(tokens[0], defaultExpectedExpires);
     });
 
-    it<LocalTestContext>('gets user id of session and updates expiry according to config', async ({
-      config,
-      sessionRepository,
-      sessionService,
-    }) => {
+    it('gets user id of session and updates expiry', async ({config, sessionRepository, sessionService}) => {
       const newLoginSessionTTL = 10_000;
       const newExpiry = new Date(date.getTime() + newLoginSessionTTL);
 
@@ -135,7 +116,7 @@ describe('Session service', () => {
       expect(sessionRepository.updateSessionExpiry).toHaveBeenCalledWith(tokens[0], newExpiry);
     });
 
-    it<LocalTestContext>('bubbles up other errors', async ({sessionRepository, sessionService}) => {
+    it('bubbles up other errors', async ({sessionRepository, sessionService}) => {
       sessionRepository.getValidSession.mockRejectedValueOnce(error1);
       const getResult1 = sessionService.getAndRefreshSession('token');
 
@@ -147,14 +128,14 @@ describe('Session service', () => {
     });
   });
 
-  describe('Invalidate session', () => {
-    it<LocalTestContext>('deletes session entry', async ({sessionRepository, sessionService}) => {
+  describe<LocalTestContext>('Invalidate session', it => {
+    it('deletes session entry', async ({sessionRepository, sessionService}) => {
       await sessionService.invalidateUserSession(tokens[0]);
 
       expect(sessionRepository.deleteSession).toHaveBeenCalledWith(tokens[0]);
     });
 
-    it<LocalTestContext>('bubbles up other errors', async ({sessionRepository, sessionService}) => {
+    it('bubbles up other errors', async ({sessionRepository, sessionService}) => {
       sessionRepository.deleteSession.mockRejectedValue(error1);
 
       const invalidateResult = sessionService.invalidateUserSession(tokens[0]);

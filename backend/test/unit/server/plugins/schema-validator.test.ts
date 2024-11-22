@@ -6,7 +6,7 @@ import {Type} from '@sinclair/typebox';
 import formatTestNames from '@test/unit/test-utils/format-test-names.js';
 import {createContainer, type AwilixContainer} from 'awilix';
 import Fastify from 'fastify';
-import {beforeEach, describe, expect, it, vi, type Mock, type Mocked, type TestAPI} from 'vitest';
+import {beforeEach, describe, expect, vi, type Mock, type Mocked} from 'vitest';
 
 interface LocalTestContext {
   container: AwilixContainer<Mocked<Dependencies>>;
@@ -96,8 +96,8 @@ describe('Schema validator', () => {
     context.fastify.setErrorHandler(context.errorHandlerMock);
   });
 
-  describe('schema error message validation', () => {
-    (it as TestAPI<LocalTestContext>).for(
+  describe<LocalTestContext>('schema error message validation', it => {
+    it.for(
       formatTestNames([
         {name: 'any', schema: Type.Any()},
         {name: 'string', schema: Type.String({minLength: 1, maxLength: 10})},
@@ -300,8 +300,8 @@ describe('Schema validator', () => {
     });
   });
 
-  describe('body validation', () => {
-    (it as TestAPI<LocalTestContext>).for(
+  describe<LocalTestContext>('body validation', it => {
+    it.for(
       formatTestNames([
         {name: 'any', schema: schemas.any, body: '"idk"', expected: 'idk'},
         {name: 'unknown', schema: schemas.unknown, body: '1', expected: 1},
@@ -342,7 +342,7 @@ describe('Schema validator', () => {
       expect(routeHandlerMock.mock.calls[0][0].body).toEqual(expected);
     });
 
-    (it as TestAPI<LocalTestContext>).for(
+    it.for(
       formatTestNames([
         {
           name: 'wrong type string/integer',
@@ -472,5 +472,9 @@ describe('Schema validator', () => {
       expect(errorHandlerMock.mock.calls[0][0].requestErrors).toEqual(expect.arrayContaining(errs));
       expect(errs).toEqual(expect.arrayContaining(errorHandlerMock.mock.calls[0][0].requestErrors));
     });
+  });
+
+  describe<LocalTestContext>('header validation', it => {
+    it.skip('', () => {});
   });
 });

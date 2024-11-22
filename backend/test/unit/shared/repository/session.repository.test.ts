@@ -1,4 +1,4 @@
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect} from 'vitest';
 import {ACCOUNTS_TABLE, SESSIONS_TABLE} from '@shared/live-video-sync-db/live-video-sync-db.schema.js';
 import SessionRepository from '@shared/repository/session.repository.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
@@ -57,12 +57,12 @@ describe('Session repository', () => {
     ];
   });
 
-  describe('Creating sessions', () => {
-    it<LocalTestContext>('creates session for existing user', async ({db}) => {
+  describe<LocalTestContext>('Creating sessions', it => {
+    it('creates session for existing user', async ({db}) => {
       await checkSessions(db, initialSessionDbState);
     });
 
-    it<LocalTestContext>('rejects sessions for nonexisting user', async ({db, sessionRepository}) => {
+    it('rejects sessions for nonexisting user', async ({db, sessionRepository}) => {
       const invalidUserId = Math.max(userId1, userId2) + 1;
 
       const saveResult = sessionRepository.saveSessionToken(invalidUserId, 'sessionToken', futureDate);
@@ -71,14 +71,14 @@ describe('Session repository', () => {
       await checkSessions(db, initialSessionDbState);
     });
 
-    it<LocalTestContext>('rejects duplicate session keys', async ({db, sessionRepository}) => {
+    it('rejects duplicate session keys', async ({db, sessionRepository}) => {
       const saveResult = sessionRepository.saveSessionToken(userId2, token1, futureDate);
 
       await expect(saveResult).rejects.toThrowError(APP_ERRORS.DUPLICATE_SESSION_TOKEN);
       await checkSessions(db, initialSessionDbState);
     });
 
-    it<LocalTestContext>('wraps unexpected errors', async ({db}) => {
+    it('wraps unexpected errors', async ({db}) => {
       const sessionRepository = new SessionRepository(fakeDrizzelError(['insert', 'values']));
 
       const saveResult = sessionRepository.saveSessionToken(userId1, 'sessionToken', futureDate);
@@ -88,14 +88,14 @@ describe('Session repository', () => {
     });
   });
 
-  describe('Getting valid sessions', () => {
-    it<LocalTestContext>('gets valid sessions', async ({db, sessionRepository}) => {
+  describe<LocalTestContext>('Getting valid sessions', it => {
+    it('gets valid sessions', async ({db, sessionRepository}) => {
       expect(await sessionRepository.getValidSession(token1)).toBe(userId1);
       expect(await sessionRepository.getValidSession(token2)).toBe(userId2);
       await checkSessions(db, initialSessionDbState);
     });
 
-    it<LocalTestContext>('does not get invalid sessions', async ({sessionRepository}) => {
+    it('does not get invalid sessions', async ({sessionRepository}) => {
       const pastDate = new Date(Date.now() - 60_000);
       const invalidToken = 'sessionToken';
       await sessionRepository.saveSessionToken(userId1, invalidToken, pastDate);
@@ -104,7 +104,7 @@ describe('Session repository', () => {
       await expect(getResult).rejects.toThrowError(APP_ERRORS.VALID_SESSION_NOT_FOUND);
     });
 
-    it<LocalTestContext>('wraps unexpected errors', async ({db}) => {
+    it('wraps unexpected errors', async ({db}) => {
       const sessionRepository = new SessionRepository(fakeDrizzelError(['select', 'from', 'where']));
 
       const saveResult = sessionRepository.getValidSession(token1);
@@ -114,8 +114,8 @@ describe('Session repository', () => {
     });
   });
 
-  describe('Updating sessions', () => {
-    it<LocalTestContext>('updates the expiration of sessions', async ({db, sessionRepository}) => {
+  describe<LocalTestContext>('Updating sessions', it => {
+    it('updates the expiration of sessions', async ({db, sessionRepository}) => {
       const futureFutureDate = new Date(Date.now() + 120_000);
 
       await sessionRepository.updateSessionExpiry(token1, futureFutureDate);
@@ -126,7 +126,7 @@ describe('Session repository', () => {
       ]);
     });
 
-    it<LocalTestContext>('wraps unexpected errors', async () => {
+    it('wraps unexpected errors', async () => {
       const sessionRepository = new SessionRepository(fakeDrizzelError(['update', 'set', 'where']));
 
       const saveResult = sessionRepository.updateSessionExpiry(token1, futureDate);
@@ -135,14 +135,14 @@ describe('Session repository', () => {
     });
   });
 
-  describe('Deleting sessions', () => {
-    it<LocalTestContext>('deletes sessions', async ({db, sessionRepository}) => {
+  describe<LocalTestContext>('Deleting sessions', it => {
+    it('deletes sessions', async ({db, sessionRepository}) => {
       await sessionRepository.deleteSession(token1);
 
       await checkSessions(db, [{userId: userId2, token: token2, expires: futureDate}]);
     });
 
-    it<LocalTestContext>('wraps unexpected errors', async () => {
+    it('wraps unexpected errors', async () => {
       const sessionRepository = new SessionRepository(fakeDrizzelError(['delete', 'where']));
 
       const saveResult = sessionRepository.deleteSession(token1);
