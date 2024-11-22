@@ -2,7 +2,7 @@ import schemaValidator, {validateSchemaFormat} from '@server/plugins/schema-vali
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import type {AppFastifyInstance} from '@shared/types/fastify.js';
-import {Type} from '@sinclair/typebox';
+import {Type, type TSchema} from '@sinclair/typebox';
 import formatTestNames from '@test/unit/test-utils/format-test-names.js';
 import {createContainer, type AwilixContainer} from 'awilix';
 import Fastify from 'fastify';
@@ -66,6 +66,7 @@ describe('Schema validator', () => {
       },
     ),
   };
+
   const valid = {
     any: 'idk',
     unknown: 1,
@@ -84,6 +85,152 @@ describe('Schema validator', () => {
     intersect: {num: 1, str: 's'},
     union: {num: 1},
   };
+
+  const validHeaderQueryParams = formatTestNames([
+    {
+      name: 'any',
+      schema: Type.Object({any: schemas.any}, {errMsg: ''}),
+      payload: {any: 'idk'},
+      expected: {any: 'idk'},
+    },
+    {
+      name: 'unknown',
+      schema: Type.Object({unknown: schemas.unknown}, {errMsg: ''}),
+      payload: {unknown: '1'},
+      expected: {unknown: '1'},
+    },
+    {
+      name: 'string',
+      schema: Type.Object({string: schemas.string}, {errMsg: ''}),
+      payload: {string: 's'},
+      expected: {string: 's'},
+    },
+    {
+      name: 'number',
+      schema: Type.Object({number: schemas.number}, {errMsg: ''}),
+      payload: {number: '1.5'},
+      expected: {number: 1.5},
+    },
+    {
+      name: 'integer',
+      schema: Type.Object({integer: schemas.integer}, {errMsg: ''}),
+      payload: {integer: '1'},
+      expected: {integer: 1},
+    },
+    {
+      name: 'boolean',
+      schema: Type.Object({boolean: schemas.boolean}, {errMsg: ''}),
+      payload: {boolean: 'true'},
+      expected: {boolean: true},
+    },
+    {
+      name: 'null',
+      schema: Type.Object({null: schemas.null}, {errMsg: ''}),
+      payload: {null: 'null'},
+      expected: {null: null},
+    },
+    {
+      name: 'literal',
+      schema: Type.Object({literal: schemas.literal}, {errMsg: ''}),
+      payload: {literal: 'literal'},
+      expected: {literal: 'literal'},
+    },
+    {
+      name: 'combined',
+      schema: Type.Object(
+        {
+          any: schemas.any,
+          unknown: schemas.unknown,
+          string: schemas.string,
+          number: schemas.number,
+          integer: schemas.integer,
+          boolean: schemas.boolean,
+          null: schemas.null,
+          literal: schemas.literal,
+        },
+        {errMsg: ''},
+      ),
+      payload: {
+        any: 'idk',
+        unknown: 's',
+        string: 's',
+        number: '1.5',
+        integer: '1',
+        boolean: 'true',
+        null: 'null',
+        literal: 'literal',
+      },
+      expected: {
+        any: 'idk',
+        unknown: 's',
+        string: 's',
+        number: 1.5,
+        integer: 1,
+        boolean: true,
+        null: null,
+        literal: 'literal',
+      },
+    },
+  ] as Array<{name: string; schema: TSchema; payload: {[key: string]: string}; expected: object}>);
+
+  function invalidHeaderQueryParams(path: string) {
+    return formatTestNames([
+      {
+        name: 'string',
+        schema: Type.Object({string: schemas.string}, {errMsg: ''}),
+        payload: {string: ''},
+        errs: [{message: 'string', key: `/${path}/string`}],
+      },
+      {
+        name: 'number',
+        schema: Type.Object({number: schemas.number}, {errMsg: ''}),
+        payload: {number: '0'},
+        errs: [{message: 'number', key: `/${path}/number`}],
+      },
+      {
+        name: 'integer',
+        schema: Type.Object({integer: schemas.integer}, {errMsg: ''}),
+        payload: {integer: '0'},
+        errs: [{message: 'integer', key: `/${path}/integer`}],
+      },
+      {
+        name: 'literal',
+        schema: Type.Object({literal: schemas.literal}, {errMsg: ''}),
+        payload: {literal: 'hi'},
+        errs: [{message: 'literal', key: `/${path}/literal`}],
+      },
+      {
+        name: 'list all errors',
+        schema: Type.Object(
+          {
+            string: schemas.string,
+            number: schemas.number,
+            integer: schemas.integer,
+            boolean: schemas.boolean,
+            null: schemas.null,
+            literal: schemas.literal,
+          },
+          {errMsg: ''},
+        ),
+        payload: {
+          string: '',
+          number: '0',
+          integer: '0',
+          boolean: 'str',
+          null: 'undefined',
+          literal: 'str',
+        },
+        errs: [
+          {message: 'string', key: `/${path}/string`},
+          {message: 'number', key: `/${path}/number`},
+          {message: 'integer', key: `/${path}/integer`},
+          {message: 'boolean', key: `/${path}/boolean`},
+          {message: 'null', key: `/${path}/null`},
+          {message: 'literal', key: `/${path}/literal`},
+        ],
+      },
+    ] as Array<{name: string; schema: TSchema; payload: {[key: string]: string}; errs: Array<object>}>);
+  }
 
   beforeEach<LocalTestContext>(context => {
     context.container = createContainer();
@@ -335,9 +482,9 @@ describe('Schema validator', () => {
         },
       ]),
     )('accepts valid body: %s', async ([, {schema, body, expected}], {fastify, routeHandlerMock}) => {
-      fastify.post('/body', {schema: {body: schema}}, routeHandlerMock);
+      fastify.post('/test', {schema: {body: schema}}, routeHandlerMock);
 
-      await fastify.inject({method: 'POST', url: '/body', body, headers: {'content-type': 'application/json'}});
+      await fastify.inject({method: 'POST', url: '/test', body, headers: {'content-type': 'application/json'}});
 
       expect(routeHandlerMock.mock.calls[0][0].body).toEqual(expected);
     });
@@ -434,7 +581,7 @@ describe('Schema validator', () => {
           errs: [{message: 'union', key: '/body'}],
         },
         {
-          name: 'list errors',
+          name: 'list all errors',
           schema: Type.Object(schemas, {errMsg: 'body'}),
           body: '{"array": [1, 2, "s"], "object": { }, "tuple": [0, 1], "record": { "1": "", "0": "" }, "intersect": {"num": "s"} }',
           errs: [
@@ -462,9 +609,9 @@ describe('Schema validator', () => {
         },
       ]),
     )('rejects invalid body: %s', async ([, {schema, body, errs}], {fastify, errorHandlerMock, routeHandlerMock}) => {
-      fastify.post('/body', {schema: {body: schema}}, routeHandlerMock);
+      fastify.post('/test', {schema: {body: schema}}, routeHandlerMock);
 
-      await fastify.inject({method: 'POST', url: '/body', body, headers: {'content-type': 'application/json'}});
+      await fastify.inject({method: 'POST', url: '/test', body, headers: {'content-type': 'application/json'}});
 
       expect(routeHandlerMock).not.toHaveBeenCalled();
       expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
@@ -475,6 +622,106 @@ describe('Schema validator', () => {
   });
 
   describe<LocalTestContext>('header validation', it => {
-    it.skip('', () => {});
+    it.for(validHeaderQueryParams)(
+      'accepts valid headers: %s',
+      async ([, {schema, payload, expected}], {fastify, routeHandlerMock}) => {
+        fastify.post('/test', {schema: {headers: schema}}, routeHandlerMock);
+
+        await fastify.inject({method: 'POST', url: '/test', headers: payload});
+
+        expect(routeHandlerMock.mock.calls[0][0].headers).toMatchObject(expected);
+      },
+    );
+
+    it.for(invalidHeaderQueryParams('headers'))(
+      'rejects invalid headers: %s',
+      async ([, {schema, payload, errs}], {fastify, errorHandlerMock, routeHandlerMock}) => {
+        fastify.post('/test', {schema: {headers: schema}}, routeHandlerMock);
+
+        await fastify.inject({method: 'POST', url: '/test', headers: payload});
+
+        expect(routeHandlerMock).not.toHaveBeenCalled();
+        expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
+
+        expect(errorHandlerMock.mock.calls[0][0].requestErrors).toEqual(expect.arrayContaining(errs));
+        expect(errs).toEqual(expect.arrayContaining(errorHandlerMock.mock.calls[0][0].requestErrors));
+      },
+    );
+  });
+
+  describe<LocalTestContext>('query string validation', it => {
+    it.for(validHeaderQueryParams)(
+      'accepts valid querystring: %s',
+      async ([, {schema, payload, expected}], {fastify, routeHandlerMock}) => {
+        fastify.post('/test', {schema: {querystring: schema}}, routeHandlerMock);
+
+        await fastify.inject({method: 'POST', url: '/test', query: payload});
+
+        expect(routeHandlerMock.mock.calls[0][0].query).toMatchObject(expected);
+      },
+    );
+
+    it.for(invalidHeaderQueryParams('querystring'))(
+      'rejects invalid querystring: %s',
+      async ([, {schema, payload, errs}], {fastify, errorHandlerMock, routeHandlerMock}) => {
+        fastify.post('/test', {schema: {querystring: schema}}, routeHandlerMock);
+
+        await fastify.inject({method: 'POST', url: '/test', query: payload});
+
+        expect(routeHandlerMock).not.toHaveBeenCalled();
+        expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
+
+        expect(errorHandlerMock.mock.calls[0][0].requestErrors).toEqual(expect.arrayContaining(errs));
+        expect(errs).toEqual(expect.arrayContaining(errorHandlerMock.mock.calls[0][0].requestErrors));
+      },
+    );
+  });
+
+  describe<LocalTestContext>('param validation', it => {
+    function formatPath(payload: {[key: string]: string}) {
+      let path = '/test';
+      for (const param of ['any', 'unknown', 'string', 'number', 'integer', 'boolean', 'null', 'literal']) {
+        if (typeof payload[param] === 'undefined') {
+          path += '/';
+        } else {
+          path += `/${payload[param]}`;
+        }
+      }
+      return path;
+    }
+
+    it.for(validHeaderQueryParams)(
+      'accepts valid params: %s',
+      async ([, {schema, payload, expected}], {fastify, routeHandlerMock}) => {
+        fastify.post(
+          '/test/:any/:unknown/:string/:number/:integer/:boolean/:null/:literal',
+          {schema: {params: schema}},
+          routeHandlerMock,
+        );
+
+        await fastify.inject({method: 'POST', url: formatPath(payload)});
+
+        expect(routeHandlerMock.mock.calls[0][0].params).toMatchObject(expected);
+      },
+    );
+
+    it.for(invalidHeaderQueryParams('params'))(
+      'rejects invalid params: %s',
+      async ([, {schema, payload, errs}], {fastify, errorHandlerMock, routeHandlerMock}) => {
+        fastify.post(
+          '/test/:any/:unknown/:string/:number/:integer/:boolean/:null/:literal',
+          {schema: {params: schema}},
+          routeHandlerMock,
+        );
+
+        await fastify.inject({method: 'POST', url: formatPath(payload)});
+
+        expect(routeHandlerMock).not.toHaveBeenCalled();
+        expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
+
+        expect(errorHandlerMock.mock.calls[0][0].requestErrors).toEqual(expect.arrayContaining(errs));
+        expect(errs).toEqual(expect.arrayContaining(errorHandlerMock.mock.calls[0][0].requestErrors));
+      },
+    );
   });
 });
