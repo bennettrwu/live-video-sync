@@ -51,6 +51,7 @@ describe('/accounts/v1/login handler', () => {
 
   (it as TestAPI<AccountRoutesTestContext>).for(
     formatTestNames([
+      {name: 'empty body', test: ''},
       {},
       {username: {}, password},
       {username, password: {}},
@@ -60,7 +61,12 @@ describe('/accounts/v1/login handler', () => {
       {name: 'very long password', username, password: '1'.repeat(257)},
     ]),
   )('rejects invalid request bodies: %s', async ([, body], {fastify, typeValidatorErrorHandlerMock}) => {
-    await fastify.inject({method: 'POST', url: '/accounts/v1/create', body});
+    await fastify.inject({
+      method: 'POST',
+      url: '/accounts/v1/create',
+      body,
+      headers: {'content-type': 'application/json'},
+    });
 
     expect(typeValidatorErrorHandlerMock).toHaveBeenCalled();
   });
