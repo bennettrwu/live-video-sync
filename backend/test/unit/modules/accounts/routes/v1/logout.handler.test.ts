@@ -1,27 +1,20 @@
-import SessionService from '@shared/services/session.service.js';
-import {checkErrorResponse, checkSuccessResponse} from '@test/unit/utils/check-response.js';
-import fakeClass from '@test/unit/utils/fake-class.js';
-import useTestFastifyInstance, {type FastifyTestContext} from '@test/unit/utils/use-test-fastify-instance.js';
-import {asValue} from 'awilix';
-import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
+import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
+import {describe, expect, it} from 'vitest';
 import checkSessionCookie from '../check-session-cookie.js';
-
-interface LocalTestContext extends FastifyTestContext {
-  sessionService: Mocked<SessionService>;
-}
+import setupAccountHandlerTests, {type AccountRoutesTestContext} from '../setup-account-handler-tests.js';
+import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 
 describe('/accounts/v1/logout handler', () => {
+  setupAccountHandlerTests();
+
   const token = 'someSessionToken';
 
-  beforeEach<LocalTestContext>(context => {
-    useTestFastifyInstance(context);
-
-    context.sessionService = fakeClass(SessionService);
-
-    context.container.register({sessionService: asValue(context.sessionService)});
-  });
-
-  it<LocalTestContext>('invalidates user session', async ({fastify, config, sessionService, getSessionTokenMock}) => {
+  it<AccountRoutesTestContext>('invalidates user session', async ({
+    fastify,
+    config,
+    sessionService,
+    getSessionTokenMock,
+  }) => {
     getSessionTokenMock.mockReturnValue(token);
 
     const response = await fastify.inject({
@@ -31,19 +24,19 @@ describe('/accounts/v1/logout handler', () => {
     });
 
     expect(sessionService.invalidateUserSession).toHaveBeenCalledWith(token);
-    checkSuccessResponse(response, 200);
+    checkSuccessResponseFormat(response, 200);
     checkSessionCookie(response.cookies[0], '', new Date(0), config.server.cookieSigningKey);
   });
 
-  it<LocalTestContext>('converts unexpected errors to 500 http error', async ({fastify, sessionService}) => {
+  it<AccountRoutesTestContext>('converts unexpected errors to 500 http error', async ({
+    fastify,
+    errorHandlerMock,
+    sessionService,
+  }) => {
     sessionService.invalidateUserSession.mockRejectedValue(new Error('some error'));
 
-    const response = await fastify.inject({
-      method: 'POST',
-      url: '/accounts/v1/logout',
-      cookies: {sessionToken: token},
-    });
+    await fastify.inject({method: 'POST', url: '/accounts/v1/logout', cookies: {sessionToken: token}});
 
-    checkErrorResponse(response, 500);
+    expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.INTERNAL_SERVER_ERROR);
   });
 });

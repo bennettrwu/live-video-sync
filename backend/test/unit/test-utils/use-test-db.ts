@@ -16,14 +16,12 @@ import {
 
 const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
 
-let db: LiveVideoSyncDB;
-declare module 'vitest' {
-  export interface TestContext {
-    db: LiveVideoSyncDB;
-  }
+export interface DbTestContext {
+  db: LiveVideoSyncDB;
 }
 
 export function useTestDb() {
+  let db: LiveVideoSyncDB;
   beforeAll(async () => {
     const postgresContainer = await new PostgreSqlContainer('postgres:17.0').start();
 
@@ -33,11 +31,11 @@ export function useTestDb() {
     await migrate(db, {migrationsFolder: path.join(DIRNAME, '../../../drizzle')});
   }, 60_000);
 
-  beforeEach(context => {
+  beforeEach<DbTestContext>(context => {
     context.db = db;
   });
 
-  afterEach(async () => {
+  afterEach<DbTestContext>(async ({db}) => {
     await db.delete(ACCOUNTS_TABLE);
     await db.delete(SESSIONS_TABLE);
     await db.delete(ROOMS_TABLE);

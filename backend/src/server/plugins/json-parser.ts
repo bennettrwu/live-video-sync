@@ -9,15 +9,9 @@ export default fastifyPlugin((fastify: AppFastifyInstance) => {
     const [parsedRes, parseErr] = etf((b: Buffer | string) => {
       return JSON.parse(b.toString());
     }, body);
+
     if (parseErr) {
-      return done(
-        new HTTP_ERRORS.BAD_REQUEST([
-          {
-            message: 'Something went wrong parsing your request. Please try again later.',
-            key: '/body',
-          },
-        ]),
-      );
+      return done(new HTTP_ERRORS.BAD_REQUEST([{message: 'Invalid JSON found in request body.', key: '/body'}]));
     }
     done(null, parsedRes);
   });

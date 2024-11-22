@@ -13,15 +13,15 @@ export const LOGIN_ACCOUNT_SCHEMA = {
       username: Type.String({
         minLength: 1,
         maxLength: 16,
-        errorMessage: 'Username must be between 1 and 16 characters long and should not contain any whitespace.',
+        errMsg: 'Username must be between 1 and 16 characters long and should not contain any whitespace.',
       }),
       password: Type.String({
         minLength: 8,
         maxLength: 256,
-        errorMessage: 'Password must be between 8 and 256 characters long.',
+        errMsg: 'Password must be between 8 and 256 characters long.',
       }),
     },
-    {description: 'User credentials'},
+    {description: 'User credentials', errMsg: 'Request must supply username and password.'},
   ),
   response: {
     200: Type.Object(

@@ -8,7 +8,7 @@ export class HttpError extends AppError {
   message = 'Server encountered an unexpected error. Please try again later.';
 }
 
-class BadRequest extends HttpError {
+export class BadRequest extends HttpError {
   statusCode = 400;
   message = '';
   isOperational = true;

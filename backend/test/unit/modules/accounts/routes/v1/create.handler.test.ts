@@ -1,39 +1,28 @@
-import {asValue} from 'awilix';
-import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
-import AccountsService from '@src/modules/accounts/services/accounts.service.js';
-import SessionService from '@shared/services/session.service.js';
-import fakeClass from '@test/unit/utils/fake-class.js';
-import type {FastifyTestContext} from '@test/unit/utils/use-test-fastify-instance.js';
-import useTestFastifyInstance from '@test/unit/utils/use-test-fastify-instance.js';
+import {describe, expect, it, type TestAPI} from 'vitest';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import checkSessionCookie from '../check-session-cookie.js';
-import {checkClientErrorResponse, checkErrorResponse, checkSuccessResponse} from '@test/unit/utils/check-response.js';
-
-interface LocalTestContext extends FastifyTestContext {
-  accountsService: Mocked<AccountsService>;
-  sessionService: Mocked<SessionService>;
-}
+import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
+import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
+import {checkBadRequestError} from '@test/unit/test-utils/check-bad-request-error.js';
+import formatTestNames from '@test/unit/test-utils/format-test-names.js';
+import type {AccountRoutesTestContext} from '../setup-account-handler-tests.js';
+import setupAccountHandlerTests from '../setup-account-handler-tests.js';
 
 describe('/accounts/v1/create handler', () => {
+  setupAccountHandlerTests();
+
   const userId = 1;
   const username = 'testUser1';
   const password = 'somepassword';
   const token = 'someSessionToken';
   const expires = new Date();
 
-  beforeEach<LocalTestContext>(context => {
-    useTestFastifyInstance(context);
-
-    context.accountsService = fakeClass(AccountsService);
-    context.sessionService = fakeClass(SessionService);
-
-    context.container.register({
-      accountsService: asValue(context.accountsService),
-      sessionService: asValue(context.sessionService),
-    });
-  });
-
-  it<LocalTestContext>('creates user account', async ({fastify, config, accountsService, sessionService}) => {
+  it<AccountRoutesTestContext>('creates user account and returns session token in cookie', async ({
+    fastify,
+    config,
+    accountsService,
+    sessionService,
+  }) => {
     accountsService.createNewAccount.mockImplementation(async uname => {
       return {userId, username: uname, passwordHash: 'somehash'};
     });
@@ -41,62 +30,59 @@ describe('/accounts/v1/create handler', () => {
 
     const response = await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
 
+    checkSuccessResponseFormat(response, 201);
+    checkSessionCookie(response.cookies[0], token, expires, config.server.cookieSigningKey);
     expect(accountsService.createNewAccount).toHaveBeenCalledWith(username, password);
     expect(sessionService.createNewSession).toHaveBeenCalledWith(userId);
-    checkSuccessResponse(response, 201);
-    checkSessionCookie(response.cookies[0], token, expires, config.server.cookieSigningKey);
   });
 
-  it<LocalTestContext>('rejects duplicate accounts', async ({fastify, accountsService}) => {
+  it<AccountRoutesTestContext>('rejects duplicate accounts', async ({fastify, accountsService, errorHandlerMock}) => {
     accountsService.createNewAccount.mockRejectedValue(new APP_ERRORS.DUPLICATE_USERNAME());
 
-    const response = await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
+    await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
 
-    checkClientErrorResponse(response, ['/body/username']);
+    expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
+    checkBadRequestError(errorHandlerMock.mock.calls[0][0], ['/body/username']);
   });
 
-  it<LocalTestContext>('converts unexpected errors to 500 http error', async ({
+  it<AccountRoutesTestContext>('converts unexpected errors to 500 http error', async ({
     fastify,
     accountsService,
     sessionService,
+    errorHandlerMock,
   }) => {
     accountsService.createNewAccount.mockResolvedValue({userId, username, passwordHash: 'somehash'});
     sessionService.createNewSession.mockRejectedValue(new Error('some error'));
 
-    const response = await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
+    await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
 
-    checkErrorResponse(response, 500);
+    expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.INTERNAL_SERVER_ERROR);
   });
 
-  it<LocalTestContext>('rejects invalid username and/or passwords', async ({fastify, accountsService}) => {
+  it<AccountRoutesTestContext>('rejects invalid usernames', async ({fastify, errorHandlerMock, accountsService}) => {
     accountsService.isValidUsername.mockImplementation(() => {
-      throw new APP_ERRORS.INVALID_USERNAME('bad');
+      throw new APP_ERRORS.INVALID_USERNAME('invalid');
     });
-    let response = await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
-    checkClientErrorResponse(response, ['/body/username']);
 
-    response = await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username: '', password}});
-    checkClientErrorResponse(response, ['/body/username']);
+    await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
 
-    response = await fastify.inject({
-      method: 'POST',
-      url: '/accounts/v1/create',
-      body: {username: '1'.repeat(17), password},
-    });
-    checkClientErrorResponse(response, ['/body/username']);
+    expect(errorHandlerMock.mock.calls[0][0]).toBeInstanceOf(HTTP_ERRORS.BAD_REQUEST);
+    checkBadRequestError(errorHandlerMock.mock.calls[0][0], ['/body/username']);
+  });
 
-    response = await fastify.inject({
-      method: 'POST',
-      url: '/accounts/v1/create',
-      body: {username, password: '1'.repeat(7)},
-    });
-    checkClientErrorResponse(response, ['/body/password']);
+  (it as TestAPI<AccountRoutesTestContext>).for(
+    formatTestNames([
+      {},
+      {username: {}, password},
+      {username, password: {}},
+      {username: '', password},
+      {username: '1'.repeat(17), password},
+      {username, password: '1'.repeat(7)},
+      {name: 'very long password', username, password: '1'.repeat(257)},
+    ]),
+  )('rejects invalid request bodies: %s', async ([, body], {fastify, typeValidatorErrorHandlerMock}) => {
+    await fastify.inject({method: 'POST', url: '/accounts/v1/create', body});
 
-    response = await fastify.inject({
-      method: 'POST',
-      url: '/accounts/v1/create',
-      body: {username, password: '1'.repeat(257)},
-    });
-    checkClientErrorResponse(response, ['/body/password']);
+    expect(typeValidatorErrorHandlerMock).toHaveBeenCalled();
   });
 });

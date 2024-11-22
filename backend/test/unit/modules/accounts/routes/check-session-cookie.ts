@@ -1,6 +1,6 @@
 // eslint-disable-next-line n/no-extraneous-import
 import inject from 'light-my-request';
-import {sign} from '@fastify/cookie';
+import {unsign} from '@fastify/cookie';
 import {expect} from 'vitest';
 
 export default function checkSessionCookie(
@@ -9,7 +9,10 @@ export default function checkSessionCookie(
   expires: Date,
   cookieSecret: string,
 ) {
-  expect(cookie.value).toBe(sign(token, cookieSecret));
+  const {valid, value} = unsign(cookie.value, cookieSecret);
+
+  expect(valid).toBeTruthy();
+  expect(value).toBe(token);
   expect(cookie.name).toBe('sessionToken');
   expect(cookie.httpOnly).toBeTruthy();
   expect(cookie.secure).toBeTruthy();

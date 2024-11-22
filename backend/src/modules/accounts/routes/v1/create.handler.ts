@@ -13,15 +13,15 @@ export const CREATE_ACCOUNT_SCHEMA = {
       username: Type.String({
         minLength: 1,
         maxLength: 16,
-        errorMessage: 'Username must be between 1 and 16 characters long.',
+        errMsg: 'Username must be between 1 and 16 characters long.',
       }),
       password: Type.String({
         minLength: 8,
         maxLength: 256,
-        errorMessage: 'Password must be between 8 and 256 characters long.',
+        errMsg: 'Password must be between 8 and 256 characters long.',
       }),
     },
-    {description: 'New user account credentials'},
+    {description: 'New user account credentials', errMsg: 'Request must supply username and password.'},
   ),
   response: {
     201: Type.Object(
@@ -69,7 +69,7 @@ export async function createAccountHandler(
 
   const [session, newSessionErr] = await etp(sessionService.createNewSession(account.userId));
   if (newSessionErr) return errorHandler(newSessionErr);
-
+  console.log(reply.setCookie);
   reply.setCookie('sessionToken', session.token, {
     expires: session.expires,
     signed: true,

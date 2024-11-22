@@ -1,16 +1,15 @@
-import {checkSuccessResponse} from '@test/unit/utils/check-response.js';
-import type {FastifyTestContext} from '@test/unit/utils/use-test-fastify-instance.js';
-import useTestFastifyInstance from '@test/unit/utils/use-test-fastify-instance.js';
+import healthRoute from '@src/modules/admin/health.route.js';
+import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
 import {beforeEach, describe, it} from 'vitest';
 
 describe('/admin/v1/health handler', () => {
-  beforeEach<FastifyTestContext>(context => {
-    useTestFastifyInstance(context);
-  });
+  useTestFastifyInstance();
+  beforeEach<FastifyTestContext>(context => context.fastify.register(healthRoute));
 
   it<FastifyTestContext>('returns 200', async ({fastify}) => {
     const response = await fastify.inject({method: 'GET', url: '/admin/v1/health'});
 
-    checkSuccessResponse(response, 200);
+    checkSuccessResponseFormat(response, 200);
   });
 });

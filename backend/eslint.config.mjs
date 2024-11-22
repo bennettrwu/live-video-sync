@@ -42,6 +42,7 @@ export default [{
 
     rules: {
         "no-throw-literal": "error",
+        "no-empty-pattern": "off",
         "@typescript-eslint/only-throw-error": "error",
         "@typescript-eslint/no-unused-expressions": "off",
         "@typescript-eslint/no-unused-vars": "warn",

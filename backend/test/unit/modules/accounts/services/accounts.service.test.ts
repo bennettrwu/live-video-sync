@@ -3,7 +3,7 @@ import {beforeEach, describe, expect, it, type Mocked} from 'vitest';
 import AccountsService from '@src/modules/accounts/services/accounts.service.js';
 import HashingService from '@shared/services/hashing.service.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
-import fakeClass from '@test/unit/utils/fake-class.js';
+import fakeClass from '@test/unit/test-utils/fake-class.js';
 
 interface LocalTestContext {
   accountsRepository: Mocked<AccountsRepository>;

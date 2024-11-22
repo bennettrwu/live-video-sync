@@ -9,15 +9,15 @@ import {APP_ERRORS} from '@shared/errors/app-errors.js';
 // Custom schema validator to allow for custom error handling
 export default fastifyPlugin((fastify: AppFastifyInstance) => {
   SetErrorFunction(e => {
-    if (e.schema.errorMessage && typeof e.schema.errorMessage === 'string') {
-      return e.schema.errorMessage;
+    if (e.schema.errMsg && typeof e.schema.errMsg === 'string') {
+      return e.schema.errMsg;
     }
     throw new APP_ERRORS.UNDEFINED_SCHEMA_ERROR_MESSAGE().causedBy(e);
   });
 
   fastify.setValidatorCompiler(schemaDef => {
     const validator = TypeBoxValidatorCompiler(schemaDef as FastifyRouteSchemaDef<TSchema>);
-
+    // console.log(schemaDef.schema.properties.record)
     return (...args) => {
       const result = validator(...args) as unknown as {
         value: unknown;

@@ -78,7 +78,7 @@ export const APP_ERRORS = Object.freeze({
 
   UNDEFINED_SCHEMA_ERROR_MESSAGE: createAppError(
     'UNDEFINED_SCHEMA_ERROR_MESSAGE',
-    'A schema validation error occured on property that did not have a user facing errorMessage defined',
+    'A schema validation error occured on property that did not have a user facing errMsg defined',
     false,
   ),
 
