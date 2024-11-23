@@ -19,7 +19,6 @@ const SCHEMA = Type.Object({
   NODE_ENV: Type.Enum(NODE_ENV),
 
   LOG_LEVEL: Type.Enum(LOG_LEVEL),
-  LOG_FILE: Type.String(),
 
   HOST: Type.String({default: 'localhost'}),
   PORT: Type.Number({default: 8000}),
@@ -46,7 +45,6 @@ export const CONFIG = Object.freeze({
   isProduction: ENV.NODE_ENV === NODE_ENV.PRODUCTION,
   log: {
     level: ENV.LOG_LEVEL,
-    file: ENV.LOG_FILE,
   },
   server: {
     host: ENV.HOST,

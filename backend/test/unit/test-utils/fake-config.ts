@@ -9,7 +9,6 @@ export default function fakeConfig(override?: RecursivePartial<ConfigType>): Wri
     isProduction: false,
     log: {
       level: LOG_LEVEL.DEBUG,
-      file: './logs/test.log',
     },
     server: {
       host: 'localhost',

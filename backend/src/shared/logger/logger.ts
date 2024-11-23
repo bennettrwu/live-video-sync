@@ -8,25 +8,10 @@ export type Logger = pino.Logger;
  * @returns created logger
  */
 export default function logger(config: Dependencies['config']): Logger {
-  let transports = pino.transport({
-    level: config.log.level,
-    target: 'pino/file',
-    options: {
-      destination: config.log.file,
-    },
-  });
-
-  // Also print to console if in development
+  let transport = undefined;
   if (config.isDevelopment) {
-    transports = pino.transport({
+    transport = pino.transport({
       targets: [
-        {
-          level: config.log.level,
-          target: 'pino/file',
-          options: {
-            destination: config.log.file,
-          },
-        },
         {
           level: process.env.LOG_LEVEL,
           target: 'pino-pretty',
@@ -36,10 +21,6 @@ export default function logger(config: Dependencies['config']): Logger {
     });
   }
 
-  const logger = pino({level: config.log.level, serializers: {err: pino.stdSerializers.errWithCause}}, transports);
-
-  logger.info(`Log level set to: ${config.log.level}`);
-  logger.info(`Log file saved to: ${config.log.file}`);
-
+  const logger = pino({level: config.log.level, serializers: {err: pino.stdSerializers.errWithCause}}, transport);
   return logger;
 }
