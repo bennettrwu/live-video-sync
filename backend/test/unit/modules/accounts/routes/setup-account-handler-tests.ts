@@ -2,11 +2,11 @@ import SessionService from '@shared/services/session.service.js';
 import AccountsRepository from '@src/modules/accounts/repository/accounts.repository.js';
 import accountsRoute from '@src/modules/accounts/routes/accounts.route.js';
 import AccountsService from '@src/modules/accounts/services/accounts.service.js';
-import fakeClass from '@test/unit/test-utils/fake-class.js';
+import fakeClass from '@test/utils/fakes/fake-class.js';
 import {
   useTestFastifyInstanceWithAuth,
   type FastifyAuthedTestContext,
-} from '@test/unit/test-utils/use-test-fastify-instance.js';
+} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {asValue} from 'awilix';
 import {beforeEach, type Mocked} from 'vitest';
 

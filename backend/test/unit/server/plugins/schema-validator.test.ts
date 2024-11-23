@@ -3,7 +3,7 @@ import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import type {AppFastifyInstance} from '@shared/types/fastify.js';
 import {Type, type TSchema} from '@sinclair/typebox';
-import formatTestNames from '@test/unit/test-utils/format-test-names.js';
+import formatTestNames from '@test/utils/format-test-names.js';
 import {createContainer, type AwilixContainer} from 'awilix';
 import Fastify from 'fastify';
 import {beforeEach, describe, expect, vi, type Mock, type Mocked} from 'vitest';

@@ -9,7 +9,7 @@ import type Module2Service from './test-dependencies/modules/module2/some/nestin
 import type Module2Repository from './test-dependencies/modules/module2/some/nesting/module2.repository.js';
 import type SharedService from './test-dependencies/shared/some/nesting/shared.service.js';
 import type SharedRepository from './test-dependencies/shared/some/nesting/shared.repository.js';
-import formatTestNames from '../test-utils/format-test-names.js';
+import formatTestNames from '../../utils/format-test-names.js';
 
 const TEST_DEPS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'test-dependencies');
 

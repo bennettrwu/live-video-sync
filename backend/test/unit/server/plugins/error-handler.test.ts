@@ -4,7 +4,7 @@ import type {FastifyInstance} from 'fastify';
 import Fastify from 'fastify';
 import type {Logger} from 'pino';
 import {beforeEach, describe, expect, vi, type Mock, type Mocked, type TestContext} from 'vitest';
-import fakeLogger from '../../test-utils/fake-logger.js';
+import fakeLogger from '../../../utils/fakes/fake-logger.js';
 import errorHandler from '@server/plugins/error-handler.js';
 
 interface LocalTestContext extends TestContext {

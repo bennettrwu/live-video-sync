@@ -2,8 +2,8 @@ import {beforeEach, describe, expect} from 'vitest';
 import AccountsRepository from '@src/modules/accounts/repository/accounts.repository.js';
 import {ACCOUNTS_TABLE} from '@shared/live-video-sync-db/live-video-sync-db.schema.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
-import {useTestDb, type DbTestContext} from '@test/unit/test-utils/use-test-db.js';
-import fakeDrizzelError from '@test/unit/test-utils/fake-drizzle-error.js';
+import {useTestDb, type DbTestContext} from '@test/utils/test-setup/use-test-db.js';
+import fakeDrizzelError from '@test/utils/fakes/fake-drizzle-error.js';
 import type {LiveVideoSyncDB} from '@shared/live-video-sync-db/live-video-sync-db.js';
 
 interface LocalTestContext extends DbTestContext {

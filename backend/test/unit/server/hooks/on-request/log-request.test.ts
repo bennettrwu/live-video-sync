@@ -1,5 +1,5 @@
 import logRequest from '@server/hooks/on-request/log-request.js';
-import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {type FastifyRequest} from 'fastify';
 import {beforeEach, describe, expect, vi} from 'vitest';
 

@@ -1,6 +1,6 @@
 import jsonParser from '@server/plugins/json-parser.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
-import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {beforeEach, describe, expect} from 'vitest';
 
 describe<FastifyTestContext>('Json parser', it => {

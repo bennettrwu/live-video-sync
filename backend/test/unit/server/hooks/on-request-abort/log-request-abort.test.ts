@@ -1,5 +1,5 @@
 import logRequestAbort from '@server/hooks/on-request-abort/log-request-abort.js';
-import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {type FastifyInstance} from 'fastify';
 import {describe, expect} from 'vitest';
 

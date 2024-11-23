@@ -1,10 +1,10 @@
 import {describe, expect} from 'vitest';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import checkSessionCookie from '../check-session-cookie.js';
-import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
+import {checkSuccessResponseFormat} from '@test/utils/validators/check-success-response-format.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
-import {checkBadRequestError} from '@test/unit/test-utils/check-bad-request-error.js';
-import formatTestNames from '@test/unit/test-utils/format-test-names.js';
+import {checkBadRequestError} from '@test/utils/validators/check-bad-request-error.js';
+import formatTestNames from '@test/utils/format-test-names.js';
 import type {AccountRoutesTestContext} from '../setup-account-handler-tests.js';
 import setupAccountHandlerTests from '../setup-account-handler-tests.js';
 

@@ -5,12 +5,12 @@ import {fastifyAwilixPlugin} from '@fastify/awilix';
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox';
 import fastifyCookie from '@fastify/cookie';
 import type {ConfigType} from '@config/config.js';
-import fakeConfig from './fake-config.js';
+import fakeConfig from '../fakes/fake-config.js';
 import {SetErrorFunction} from '@sinclair/typebox/errors';
 import type {RecursivePartial} from '@shared/types/recursive-partial.js';
 import type {Writeable} from '@shared/types/writeable.js';
 import type {Logger} from '@shared/logger/logger.js';
-import fakeLogger from './fake-logger.js';
+import fakeLogger from '../fakes/fake-logger.js';
 
 export interface FastifyTestContext extends TestContext {
   container: AwilixContainer<Mocked<Dependencies>>;

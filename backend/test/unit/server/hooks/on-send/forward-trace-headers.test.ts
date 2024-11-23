@@ -1,5 +1,5 @@
 import forwardTraceHeaders from '@server/hooks/on-send/forward-trace-headers.js';
-import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {type FastifyInstance} from 'fastify';
 import {beforeEach, describe, expect} from 'vitest';
 

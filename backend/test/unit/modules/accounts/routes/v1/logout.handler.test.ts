@@ -1,4 +1,4 @@
-import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
+import {checkSuccessResponseFormat} from '@test/utils/validators/check-success-response-format.js';
 import {describe, expect} from 'vitest';
 import checkSessionCookie from '../check-session-cookie.js';
 import setupAccountHandlerTests, {type AccountRoutesTestContext} from '../setup-account-handler-tests.js';

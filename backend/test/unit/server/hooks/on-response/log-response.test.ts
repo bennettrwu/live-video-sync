@@ -1,5 +1,5 @@
 import logResponse from '@server/hooks/on-response/log-response.js';
-import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {type FastifyInstance} from 'fastify';
 import {describe, expect} from 'vitest';
 

@@ -1,6 +1,6 @@
 import healthRoute from '@src/modules/admin/health.route.js';
-import {checkSuccessResponseFormat} from '@test/unit/test-utils/check-success-response-format.js';
-import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
+import {checkSuccessResponseFormat} from '@test/utils/validators/check-success-response-format.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {beforeEach, describe} from 'vitest';
 
 describe<FastifyTestContext>('/admin/v1/health handler', it => {

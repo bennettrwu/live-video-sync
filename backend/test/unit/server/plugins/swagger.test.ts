@@ -1,5 +1,5 @@
 import swagger from '@server/plugins/swagger.js';
-import {useTestFastifyInstance, type FastifyTestContext} from '@test/unit/test-utils/use-test-fastify-instance.js';
+import {useTestFastifyInstance, type FastifyTestContext} from '@test/utils/test-setup/use-test-fastify-instance.js';
 import {describe, expect} from 'vitest';
 
 describe<FastifyTestContext>('Swagger', it => {

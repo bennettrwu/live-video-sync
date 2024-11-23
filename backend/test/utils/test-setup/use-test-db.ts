@@ -4,7 +4,7 @@ import type {LiveVideoSyncDB} from '@shared/live-video-sync-db/live-video-sync-d
 import {PostgreSqlContainer} from '@testcontainers/postgresql';
 import {drizzle} from 'drizzle-orm/node-postgres';
 import {migrate} from 'drizzle-orm/node-postgres/migrator';
-import {beforeAll, beforeEach, afterEach} from 'vitest';
+import {beforeAll, beforeEach, afterEach, type TestContext} from 'vitest';
 import {
   ACCOUNTS_TABLE,
   MEDIA_TABLE,
@@ -16,7 +16,7 @@ import {
 
 const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
 
-export interface DbTestContext {
+export interface DbTestContext extends TestContext {
   db: LiveVideoSyncDB;
   connectionString: string;
 }
