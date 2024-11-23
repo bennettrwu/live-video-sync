@@ -29,11 +29,11 @@ export default function errorHandler(err: unknown, req: FastifyRequest, reply: F
   }
 
   if (err instanceof AppError) {
-    const error = new APP_ERRORS.UNCAUGHT_NON_HTTP_ERROR().causedBy(err);
-    req.log.error({msg: 'Request cause', err: error});
+    const e = new APP_ERRORS.UNCAUGHT_NON_HTTP_ERROR().causedBy(err);
+    req.log.error({msg: 'Request caused an App Error that was not handled before reaching error handler', err: e});
   } else {
-    const error = new APP_ERRORS.UNCAUGHT_UNKNOWN_ERROR().causedBy(err);
-    req.log.error({msg: 'Request cause an unknown error that was not handled', err: error});
+    const e = new APP_ERRORS.UNCAUGHT_UNKNOWN_ERROR().causedBy(err);
+    req.log.error({msg: 'Request caused an unknown error that was not handled before reaching error handler', err: e});
   }
 
   return reply.code(500).send({

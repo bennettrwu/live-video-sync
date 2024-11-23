@@ -8,7 +8,7 @@ export default defineConfig({
       enabled: true,
       provider: 'istanbul', // or 'v8'
       include: ['src'],
-      exclude: ['src/shared/live-video-sync-db/live-video-sync-db.schema.ts']
+      exclude: ['src/index.ts', 'src/shared/live-video-sync-db/live-video-sync-db.schema.ts']
     },
     server: {
       deps: {
