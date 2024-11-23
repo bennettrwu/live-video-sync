@@ -5,7 +5,7 @@ import {AppFastifyInstance} from '@shared/types/fastify.js';
 export default fastifyPlugin((fastify: AppFastifyInstance) => {
   fastify.addHook('onResponse', (req, reply, done) => {
     req.log.info({
-      msg: 'Request completed',
+      msg: 'request completed',
       statusCode: reply.statusCode,
       responseTime: reply.elapsedTime,
     });

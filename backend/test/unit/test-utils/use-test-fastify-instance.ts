@@ -9,12 +9,15 @@ import fakeConfig from './fake-config.js';
 import {SetErrorFunction} from '@sinclair/typebox/errors';
 import type {RecursivePartial} from '@shared/types/recursive-partial.js';
 import type {Writeable} from '@shared/types/writeable.js';
+import type {Logger} from '@shared/logger/logger.js';
+import fakeLogger from './fake-logger.js';
 
 export interface FastifyTestContext extends TestContext {
   container: AwilixContainer<Mocked<Dependencies>>;
   fastify: FastifyInstance;
   config: Writeable<ConfigType>;
   defaultReqId: 'test-request-id';
+  loggerMock: Mocked<Logger>;
   genReqIdMock: Mock;
   typeValidatorErrorHandlerMock: Mock;
   getSessionTokenMock: Mock;
@@ -30,6 +33,7 @@ function createTestFastifyInstanceWithConfig(customConfig?: RecursivePartial<Con
   return (context: FastifyTestContext) => {
     context.defaultReqId = 'test-request-id';
 
+    context.loggerMock = fakeLogger();
     context.genReqIdMock = vi.fn().mockImplementation(() => context.defaultReqId);
     context.typeValidatorErrorHandlerMock = vi.fn().mockImplementation(e => {
       throw e;
@@ -44,7 +48,12 @@ function createTestFastifyInstanceWithConfig(customConfig?: RecursivePartial<Con
       config: asValue(context.config),
     });
 
-    context.fastify = Fastify();
+    context.fastify = Fastify({
+      loggerInstance: context.loggerMock,
+      requestTimeout: context.config.server.connectionTimeout,
+      connectionTimeout: context.config.server.connectionTimeout,
+      disableRequestLogging: true,
+    }) as unknown as FastifyInstance;
 
     context.fastify.setGenReqId(context.genReqIdMock);
 
