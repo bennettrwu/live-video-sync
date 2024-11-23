@@ -13,6 +13,7 @@ export const LOGOUT_ACCOUNT_SCHEMA = {
       {
         statusCode: Type.Literal(200),
         success: Type.Literal(true),
+        requestId: Type.String(),
       },
       {description: 'Successfully logged out of account'},
     ),
@@ -45,5 +46,5 @@ export async function logoutAccountHandler(
     sameSite: 'strict',
   });
 
-  return reply.code(200).send({statusCode: 200, success: true});
+  return reply.code(200).send({statusCode: 200, success: true, requestId: req.id});
 }

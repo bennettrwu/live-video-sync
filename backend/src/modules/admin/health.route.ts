@@ -12,6 +12,7 @@ export default async function healthRoute(fastify: AppFastifyInstance) {
           200: Type.Object({
             statusCode: Type.Literal(200),
             success: Type.Literal(true),
+            requestId: Type.String(),
           }),
           400: SHARED_REPLY_SCHEMA[400],
           500: SHARED_REPLY_SCHEMA[500],
@@ -19,7 +20,7 @@ export default async function healthRoute(fastify: AppFastifyInstance) {
       },
     },
     (req, reply) => {
-      reply.code(200).send({statusCode: 200, success: true});
+      reply.code(200).send({statusCode: 200, success: true, requestId: req.id});
     },
   );
 }

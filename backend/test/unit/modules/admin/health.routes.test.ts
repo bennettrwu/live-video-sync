@@ -7,9 +7,9 @@ describe<FastifyTestContext>('/admin/v1/health handler', it => {
   useTestFastifyInstance();
   beforeEach<FastifyTestContext>(context => context.fastify.register(healthRoute));
 
-  it('returns 200', async ({fastify}) => {
+  it('returns 200', async ({fastify, defaultReqId}) => {
     const response = await fastify.inject({method: 'GET', url: '/admin/v1/health'});
 
-    checkSuccessResponseFormat(response, 200);
+    checkSuccessResponseFormat(response, 200, defaultReqId);
   });
 });

@@ -28,6 +28,7 @@ export const CREATE_ACCOUNT_SCHEMA = {
       {
         statusCode: Type.Literal(201),
         success: Type.Literal(true),
+        requestId: Type.String(),
       },
       {description: 'Successfully created account'},
     ),
@@ -78,5 +79,5 @@ export async function createAccountHandler(
     sameSite: 'strict',
   });
 
-  return reply.code(201).send({success: true, statusCode: 201});
+  return reply.code(201).send({success: true, statusCode: 201, requestId: req.id});
 }

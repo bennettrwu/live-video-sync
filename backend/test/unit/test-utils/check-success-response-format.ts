@@ -2,10 +2,11 @@
 import inject from 'light-my-request';
 import {expect} from 'vitest';
 
-export function checkSuccessResponseFormat(response: inject.Response, code: number) {
-  const body = response.json();
-
+export function checkSuccessResponseFormat(response: inject.Response, code: number, requestId: string) {
   expect(response.statusCode).toBe(code);
-  expect(body.statusCode).toBe(code);
-  expect(body.success).toBe(true);
+  expect(response.json()).toMatchObject({
+    statusCode: code,
+    success: true,
+    requestId,
+  });
 }

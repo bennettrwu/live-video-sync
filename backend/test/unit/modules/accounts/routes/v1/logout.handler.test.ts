@@ -9,7 +9,7 @@ describe<AccountRoutesTestContext>('/accounts/v1/logout handler', it => {
 
   const token = 'someSessionToken';
 
-  it('invalidates user session', async ({fastify, config, sessionService, getSessionTokenMock}) => {
+  it('invalidates user session', async ({fastify, config, defaultReqId, sessionService, getSessionTokenMock}) => {
     getSessionTokenMock.mockReturnValue(token);
 
     const response = await fastify.inject({
@@ -19,7 +19,7 @@ describe<AccountRoutesTestContext>('/accounts/v1/logout handler', it => {
     });
 
     expect(sessionService.invalidateUserSession).toHaveBeenCalledWith(token);
-    checkSuccessResponseFormat(response, 200);
+    checkSuccessResponseFormat(response, 200, defaultReqId);
     checkSessionCookie(response.cookies[0], '', new Date(0), config.server.cookieSigningKey);
   });
 

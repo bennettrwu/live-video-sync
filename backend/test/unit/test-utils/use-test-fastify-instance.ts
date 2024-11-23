@@ -14,6 +14,8 @@ export interface FastifyTestContext extends TestContext {
   container: AwilixContainer<Mocked<Dependencies>>;
   fastify: FastifyInstance;
   config: Writeable<ConfigType>;
+  defaultReqId: 'test-request-id';
+  genReqIdMock: Mock;
   typeValidatorErrorHandlerMock: Mock;
   getSessionTokenMock: Mock;
   errorHandlerMock: Mock;
@@ -26,11 +28,15 @@ export interface FastifyAuthedTestContext extends FastifyTestContext {
 
 function createTestFastifyInstanceWithConfig(customConfig?: RecursivePartial<ConfigType>) {
   return (context: FastifyTestContext) => {
-    context.errorHandlerMock = vi.fn().mockImplementation((err, req, res) => res.send({err: err.name}));
-    context.routeHandlerMock = vi.fn().mockImplementation((req, res) => res.send());
+    context.defaultReqId = 'test-request-id';
+
+    context.genReqIdMock = vi.fn().mockImplementation(() => context.defaultReqId);
     context.typeValidatorErrorHandlerMock = vi.fn().mockImplementation(e => {
       throw e;
     });
+    context.errorHandlerMock = vi.fn().mockImplementation((err, req, res) => res.send({err: err.name}));
+    context.routeHandlerMock = vi.fn().mockImplementation((req, res) => res.send());
+
     context.config = fakeConfig(customConfig);
 
     context.container = createContainer();
@@ -39,6 +45,8 @@ function createTestFastifyInstanceWithConfig(customConfig?: RecursivePartial<Con
     });
 
     context.fastify = Fastify();
+
+    context.fastify.setGenReqId(context.genReqIdMock);
 
     SetErrorFunction(context.typeValidatorErrorHandlerMock);
     context.fastify.setValidatorCompiler(TypeBoxValidatorCompiler);

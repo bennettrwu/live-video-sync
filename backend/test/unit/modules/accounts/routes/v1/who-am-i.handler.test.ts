@@ -12,7 +12,7 @@ describe<AccountRoutesTestContext>('/accounts/v1/who-am-i handler', it => {
   const passwordHash = 'someHash';
   const token = 'someSessionToken';
 
-  it('invalidates user session', async ({fastify, accountsRepository, getUserIdMock}) => {
+  it('invalidates user session', async ({fastify, defaultReqId, accountsRepository, getUserIdMock}) => {
     getUserIdMock.mockReturnValue(userId);
     accountsRepository.getAccountUserId.mockResolvedValue({userId, username, passwordHash});
 
@@ -23,7 +23,7 @@ describe<AccountRoutesTestContext>('/accounts/v1/who-am-i handler', it => {
     });
 
     expect(accountsRepository.getAccountUserId).toHaveBeenCalledWith(userId);
-    checkSuccessResponseFormat(response, 200);
+    checkSuccessResponseFormat(response, 200, defaultReqId);
     expect(response.json().username).toBe(username);
   });
 

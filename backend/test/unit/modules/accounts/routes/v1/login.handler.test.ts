@@ -15,13 +15,13 @@ describe<AccountRoutesTestContext>('/accounts/v1/login handler', it => {
   const token = 'someSessionToken';
   const expires = new Date();
 
-  it('logs user in', async ({fastify, config, accountsService, sessionService}) => {
+  it('logs user in', async ({fastify, config, defaultReqId, accountsService, sessionService}) => {
     accountsService.validateAccountCredentials.mockResolvedValue(userId);
     sessionService.createNewSession.mockResolvedValue({token, expires});
 
     const response = await fastify.inject({method: 'POST', url: '/accounts/v1/login', body: {username, password}});
 
-    checkSuccessResponseFormat(response, 200);
+    checkSuccessResponseFormat(response, 200, defaultReqId);
     checkSessionCookie(response.cookies[0], token, expires, config.server.cookieSigningKey);
     expect(accountsService.validateAccountCredentials).toHaveBeenCalledWith(username, password);
     expect(sessionService.createNewSession).toHaveBeenCalledWith(userId);

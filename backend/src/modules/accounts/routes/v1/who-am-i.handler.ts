@@ -15,6 +15,7 @@ export const WHO_AM_I_ACCOUNT_SCHEMA = {
         statusCode: Type.Literal(200),
         success: Type.Literal(true),
         username: Type.String(),
+        requestId: Type.String(),
       },
       {description: 'Account username of session'},
     ),
@@ -43,5 +44,5 @@ export async function whoAmIAccountHandler(
   const [account, getErr] = await etp(accountsRepository.getAccountUserId(req.getUserId()));
   if (getErr) return errorHandler(getErr);
 
-  return reply.code(200).send({statusCode: 200, success: true, username: account.username});
+  return reply.code(200).send({statusCode: 200, success: true, username: account.username, requestId: req.id});
 }

@@ -19,6 +19,7 @@ describe<AccountRoutesTestContext>('/accounts/v1/create handler', it => {
 
   it('creates user account and returns session token in cookie', async ({
     fastify,
+    defaultReqId,
     config,
     accountsService,
     sessionService,
@@ -30,7 +31,7 @@ describe<AccountRoutesTestContext>('/accounts/v1/create handler', it => {
 
     const response = await fastify.inject({method: 'POST', url: '/accounts/v1/create', body: {username, password}});
 
-    checkSuccessResponseFormat(response, 201);
+    checkSuccessResponseFormat(response, 201, defaultReqId);
     checkSessionCookie(response.cookies[0], token, expires, config.server.cookieSigningKey);
     expect(accountsService.createNewAccount).toHaveBeenCalledWith(username, password);
     expect(sessionService.createNewSession).toHaveBeenCalledWith(userId);
