@@ -8,6 +8,7 @@ export enum NODE_ENV {
 }
 
 export enum LOG_LEVEL {
+  SILENT = 'silent',
   TRACE = 'trace',
   DEBUG = 'debug',
   INFO = 'info',

@@ -18,6 +18,7 @@ describe('Logger', it => {
 
   it.for(
     formatTestNames([
+      {name: 'silent', level: LOG_LEVEL.SILENT, expected: []},
       {name: 'trace', level: LOG_LEVEL.TRACE, expected: logLines.slice(0)},
       {name: 'debug', level: LOG_LEVEL.DEBUG, expected: logLines.slice(1)},
       {name: 'info', level: LOG_LEVEL.INFO, expected: logLines.slice(2)},
