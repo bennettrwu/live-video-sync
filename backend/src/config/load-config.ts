@@ -20,7 +20,7 @@ export default function loadConfig(path?: string) {
       host: env.HOST,
       port: env.PORT,
       requestTimeout: env.GLOBAL_REQUEST_TIMEOUT,
-      connectionTimeout: env.GLOBAL_REQUEST_TIMEOUT,
+      connectionTimeout: env.GLOBAL_CONNECTION_TIMEOUT,
       loginSessionTTL: env.LOGIN_SESSION_TTL,
       cookieSigningKey: env.COOKIE_SIGNING_KEY,
     },
