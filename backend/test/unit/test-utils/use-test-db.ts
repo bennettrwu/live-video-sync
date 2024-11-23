@@ -18,21 +18,25 @@ const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
 
 export interface DbTestContext {
   db: LiveVideoSyncDB;
+  connectionString: string;
 }
 
 export function useTestDb() {
   let db: LiveVideoSyncDB;
+  let connectionString: string;
+
   beforeAll(async () => {
     const postgresContainer = await new PostgreSqlContainer('postgres:17.0').start();
 
-    const connectionString = postgresContainer.getConnectionUri();
-
+    connectionString = postgresContainer.getConnectionUri();
     db = drizzle(connectionString);
+
     await migrate(db, {migrationsFolder: path.join(DIRNAME, '../../../drizzle')});
   }, 60_000);
 
   beforeEach<DbTestContext>(context => {
     context.db = db;
+    context.connectionString = connectionString;
   });
 
   afterEach<DbTestContext>(async ({db}) => {
