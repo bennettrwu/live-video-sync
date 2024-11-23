@@ -12,7 +12,7 @@ export default defineConfig({
     },
     server: {
       deps: {
-        inline: ['@fastify/autoload']
+        inline: ['@fastify/autoload', 'awilix']
       }
     }
   },

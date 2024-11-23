@@ -19,7 +19,7 @@ declare global {
  * @param di
  * @returns updated dependency container
  */
-export function registerBaseDependencies(di: AwilixContainer): AwilixContainer<Dependencies> {
+export default function registerBaseDependencies(di: AwilixContainer): AwilixContainer<Dependencies> {
   di.register({
     config: asValue(CONFIG),
   });

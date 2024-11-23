@@ -1,9 +1,13 @@
+import path from 'path';
+import {fileURLToPath} from 'url';
 import createDependencyContainer from './dependency-injection/create-dependency-container.js';
 import createServer from './server/create-server.js';
 import {APP_ERRORS} from './shared/errors/app-errors.js';
 
+const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
+
 async function init() {
-  const dependencyContainer = await createDependencyContainer();
+  const dependencyContainer = await createDependencyContainer(DIRNAME);
 
   const logger = dependencyContainer.resolve('logger');
   const config = dependencyContainer.resolve('config');
