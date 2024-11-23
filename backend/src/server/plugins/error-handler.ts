@@ -1,6 +1,8 @@
 import {FastifyReply, FastifyRequest} from 'fastify';
 import {HTTP_ERRORS, HttpError} from '@shared/errors/http-errors.js';
 import {APP_ERRORS, AppError} from '@shared/errors/app-errors.js';
+import fastifyPlugin from 'fastify-plugin';
+import type {AppFastifyInstance} from '@shared/types/fastify.js';
 
 /**
  * Custom fastify error handler to log errors and return response in consistent format
@@ -9,7 +11,7 @@ import {APP_ERRORS, AppError} from '@shared/errors/app-errors.js';
  * @param req
  * @param reply
  */
-export default function errorHandler(err: unknown, req: FastifyRequest, reply: FastifyReply) {
+function errorHandler(err: unknown, req: FastifyRequest, reply: FastifyReply) {
   if (err instanceof HttpError) {
     if (!err.isOperational) {
       req.log.error({msg: 'Request encountered a non operational error', err});
@@ -43,3 +45,8 @@ export default function errorHandler(err: unknown, req: FastifyRequest, reply: F
     requestId: req.id,
   });
 }
+
+// Custom error handling
+export default fastifyPlugin((fastify: AppFastifyInstance) => {
+  fastify.setErrorHandler(errorHandler);
+});

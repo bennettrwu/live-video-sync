@@ -1,4 +1,3 @@
-import errorHandler from '@server/error-handler.js';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import type {FastifyInstance} from 'fastify';
@@ -6,6 +5,7 @@ import Fastify from 'fastify';
 import type {Logger} from 'pino';
 import {beforeEach, describe, expect, vi, type Mock, type Mocked, type TestContext} from 'vitest';
 import fakeLogger from '../test-utils/fake-logger.js';
+import errorHandler from '@server/plugins/error-handler.js';
 
 interface LocalTestContext extends TestContext {
   fastify: FastifyInstance;
@@ -24,7 +24,7 @@ describe('Error handler', () => {
       loggerInstance: context.loggerMock,
     }) as unknown as FastifyInstance;
 
-    context.fastify.setErrorHandler(errorHandler);
+    context.fastify.register(errorHandler);
 
     context.routeHandlerMock = vi.fn();
     context.fastify.get('/test', context.routeHandlerMock);

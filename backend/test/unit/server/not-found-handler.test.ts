@@ -3,7 +3,7 @@ import Fastify from 'fastify';
 import type {Logger} from 'pino';
 import {beforeEach, describe, expect, type Mocked, type TestContext} from 'vitest';
 import fakeLogger from '../test-utils/fake-logger.js';
-import notFoundHandler from '@server/not-found-handler.js';
+import notFoundHandler from '@server/plugins/not-found-handler.js';
 
 interface LocalTestContext extends TestContext {
   fastify: FastifyInstance;
@@ -20,7 +20,7 @@ describe<LocalTestContext>('Error handler', it => {
       loggerInstance: context.loggerMock,
     }) as unknown as FastifyInstance;
 
-    context.fastify.setNotFoundHandler(notFoundHandler);
+    context.fastify.register(notFoundHandler);
   });
 
   it('returns correct response when route is not found', async ({fastify}) => {

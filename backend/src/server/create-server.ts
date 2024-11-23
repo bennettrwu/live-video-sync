@@ -3,12 +3,8 @@ import {fileURLToPath} from 'url';
 import Fastify from 'fastify';
 import fastifyAutoload from '@fastify/autoload';
 import {fastifyAwilixPlugin} from '@fastify/awilix';
-import {TypeBoxTypeProvider, TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox';
 import {AwilixContainer} from 'awilix';
 import {v4 as uuidv4} from 'uuid';
-
-import errorHandler from './error-handler.js';
-import notFoundHandler from './not-found-handler.js';
 
 const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,12 +31,7 @@ export default function createServer(dependencyContainer: AwilixContainer<Depend
     connectionTimeout: config.server.connectionTimeout,
     requestTimeout: config.server.requestTimeout,
     disableRequestLogging: true,
-  })
-    .setValidatorCompiler(TypeBoxValidatorCompiler)
-    .withTypeProvider<TypeBoxTypeProvider>()
-    .setErrorHandler(errorHandler)
-    .setNotFoundHandler(notFoundHandler)
-    .setGenReqId(req => (req.headers['request-id'] || req.headers['x-request-id'] || uuidv4()) as string);
+  }).setGenReqId(req => (req.headers['request-id'] || req.headers['x-request-id'] || uuidv4()) as string);
 
   // Register dependency injection container
   fastify.register(fastifyAwilixPlugin, {

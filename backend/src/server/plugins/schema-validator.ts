@@ -1,6 +1,6 @@
 import fastifyPlugin from 'fastify-plugin';
 import {AppFastifyInstance} from '@shared/types/fastify.js';
-import {TypeBoxValidatorCompiler, type TSchema} from '@fastify/type-provider-typebox';
+import {TypeBoxValidatorCompiler, type TSchema, type TypeBoxTypeProvider} from '@fastify/type-provider-typebox';
 import type {FastifyRouteSchemaDef} from 'fastify/types/schema.js';
 import {HTTP_ERRORS} from '@shared/errors/http-errors.js';
 import {SetErrorFunction} from '@sinclair/typebox/errors';
@@ -60,6 +60,8 @@ export function validateSchemaFormat(schema: TSchema) {
 // Custom schema validator to allow for custom error handling
 export default fastifyPlugin((fastify: AppFastifyInstance) => {
   SetErrorFunction(e => e.schema.errMsg);
+
+  fastify.withTypeProvider<TypeBoxTypeProvider>();
 
   fastify.setValidatorCompiler(schemaDef => {
     validateSchemaFormat(schemaDef.schema as TSchema);
