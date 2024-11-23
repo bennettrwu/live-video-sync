@@ -1,6 +1,6 @@
 import SessionRepository from '@shared/repository/session.repository.js';
 import SessionService from '@shared/services/session.service.js';
-import type {ConfigType} from '@src/config/config.js';
+import type {ConfigType} from '@config/config-schema.js';
 import {beforeEach, describe, expect, vi, type Mocked} from 'vitest';
 import crypto from 'crypto';
 import {APP_ERRORS} from '@shared/errors/app-errors.js';

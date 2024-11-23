@@ -1,6 +1,6 @@
 import type {RecursivePartial} from '@shared/types/recursive-partial.js';
 import type {Writeable} from '@shared/types/writeable.js';
-import {LOG_LEVEL, NODE_ENV, type ConfigType} from '@src/config/config.js';
+import {LOG_LEVEL, NODE_ENV, type ConfigType} from '@config/config-schema.js';
 
 export default function fakeConfig(override?: RecursivePartial<ConfigType>): Writeable<ConfigType> {
   const defaultConfig: ConfigType = {

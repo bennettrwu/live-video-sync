@@ -4,7 +4,7 @@ import Fastify, {type FastifyInstance} from 'fastify';
 import {fastifyAwilixPlugin} from '@fastify/awilix';
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox';
 import fastifyCookie from '@fastify/cookie';
-import type {ConfigType} from '@config/config.js';
+import type {ConfigType} from '@config/config-schema.js';
 import fakeConfig from '../fakes/fake-config.js';
 import {SetErrorFunction} from '@sinclair/typebox/errors';
 import type {RecursivePartial} from '@shared/types/recursive-partial.js';

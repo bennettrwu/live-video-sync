@@ -3,14 +3,15 @@ import {fileURLToPath} from 'url';
 import createDependencyContainer from './dependency-injection/create-dependency-container.js';
 import createServer from './server/create-server.js';
 import {APP_ERRORS} from './shared/errors/app-errors.js';
+import loadConfig from '@config/load-config.js';
 
 const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
 
 async function init() {
-  const dependencyContainer = await createDependencyContainer(DIRNAME);
+  const config = loadConfig();
+  const dependencyContainer = await createDependencyContainer(DIRNAME, config);
 
   const logger = dependencyContainer.resolve('logger');
-  const config = dependencyContainer.resolve('config');
 
   const fastify = createServer(dependencyContainer);
 

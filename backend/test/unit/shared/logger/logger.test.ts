@@ -1,4 +1,4 @@
-import {LOG_LEVEL, type ConfigType} from '@config/config.js';
+import {LOG_LEVEL, type ConfigType} from '@config/config-schema.js';
 import logger from '@shared/logger/logger.js';
 import {describe, expect, vi} from 'vitest';
 import os from 'os';

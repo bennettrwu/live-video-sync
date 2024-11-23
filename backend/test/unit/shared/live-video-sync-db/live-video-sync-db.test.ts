@@ -2,7 +2,7 @@ import {describe, expect} from 'vitest';
 import {ACCOUNTS_TABLE} from '@shared/live-video-sync-db/live-video-sync-db.schema.js';
 import {useTestDb, type DbTestContext} from '@test/utils/test-setup/use-test-db.js';
 import liveVideoSyncDb from '@shared/live-video-sync-db/live-video-sync-db.js';
-import type {ConfigType} from '@config/config.js';
+import type {ConfigType} from '@config/config-schema.js';
 
 describe<DbTestContext>('Live video sync db', it => {
   useTestDb();

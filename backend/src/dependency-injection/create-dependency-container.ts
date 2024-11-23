@@ -1,18 +1,25 @@
 import {asClass, AwilixContainer, createContainer, InjectionMode, Lifetime} from 'awilix';
 import registerBaseDependencies from './register-base-dependencies.js';
 import path from 'path';
+import type {ConfigType} from '@config/config-schema.js';
 
 /**
- * Creates dependency container and registers all dependencies with container
+ * Creates dependency container and registers all dependencies in given directory with container
  * Files in "shared" and "modules" folders in the form *.service.js or *.repository.js
  * All dependencies are registered as class dependencies with scoped lifetimes
  * If dispose() is a class method, it is called when the dependency goes out of scope (cleanup should occur in dispose() method)
+ * Also passes provided config to be loaded as base dependency
+ * @param directory
+ * @param config
  * @returns dependency container
  */
-export default async function createDependencyContainer(directory: string): Promise<AwilixContainer<Dependencies>> {
+export default async function createDependencyContainer(
+  directory: string,
+  config: ConfigType,
+): Promise<AwilixContainer<Dependencies>> {
   const dependencyContainer = createContainer({injectionMode: InjectionMode.CLASSIC, strict: true});
 
-  registerBaseDependencies(dependencyContainer);
+  registerBaseDependencies(dependencyContainer, config);
 
   await dependencyContainer.loadModules([path.join(directory, '/{shared,modules}/**/*.{service,repository}.{js,ts}')], {
     formatName: 'camelCase',

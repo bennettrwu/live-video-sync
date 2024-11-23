@@ -10,6 +10,7 @@ import type Module2Repository from './test-dependencies/modules/module2/some/nes
 import type SharedService from './test-dependencies/shared/some/nesting/shared.service.js';
 import type SharedRepository from './test-dependencies/shared/some/nesting/shared.repository.js';
 import formatTestNames from '../../utils/format-test-names.js';
+import type {ConfigType} from '@config/config-schema.js';
 
 const TEST_DEPS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'test-dependencies');
 
@@ -38,6 +39,7 @@ describe('Create dependency container', () => {
   beforeEach<LocalTestContext>(async context => {
     context.container = (await createDependencyContainer(
       TEST_DEPS_DIR,
+      {} as ConfigType,
     )) as unknown as AwilixContainer<TestDependencies>;
 
     context.disposeSpy = vi.fn();

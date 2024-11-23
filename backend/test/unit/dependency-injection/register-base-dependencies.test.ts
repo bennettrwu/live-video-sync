@@ -1,3 +1,4 @@
+import type {ConfigType} from '@config/config-schema.js';
 import registerBaseDependencies from '@src/dependency-injection/register-base-dependencies.js';
 import {createContainer, type AwilixContainer} from 'awilix';
 import {beforeEach, describe, expect, vi, type TestContext} from 'vitest';
@@ -7,12 +8,6 @@ const {fakeLoggerFactory, fakeDbFactory} = vi.hoisted(() => {
   return {
     fakeLoggerFactory: vi.fn().mockImplementation(() => 'fakeLogger'),
     fakeDbFactory: vi.fn().mockImplementation(() => 'fakeDB'),
-  };
-});
-
-vi.mock('@config/config.js', () => {
-  return {
-    CONFIG: 'fakeConfig',
   };
 });
 
@@ -34,7 +29,7 @@ interface LocalTestContext extends TestContext {
 
 describe<LocalTestContext>('Register base dependencies', it => {
   beforeEach<LocalTestContext>(context => {
-    context.container = registerBaseDependencies(createContainer());
+    context.container = registerBaseDependencies(createContainer(), 'fakeConfig' as unknown as ConfigType);
     fakeLoggerFactory.mockClear();
     fakeDbFactory.mockClear();
   });

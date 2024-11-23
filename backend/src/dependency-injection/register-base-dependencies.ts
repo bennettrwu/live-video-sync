@@ -1,5 +1,5 @@
 import {asFunction, asValue, AwilixContainer} from 'awilix';
-import {CONFIG, ConfigType} from '@config/config.js';
+import {ConfigType} from '@config/config-schema.js';
 import createLogger, {Logger} from '@shared/logger/logger.js';
 import liveVideoSyncDB, {LiveVideoSyncDB} from '@shared/live-video-sync-db/live-video-sync-db.js';
 
@@ -16,12 +16,17 @@ declare global {
 
 /**
  * Registers global dependencies with given dependency container
+ * Includes provided config as a base dependency
  * @param di
+ * @param config
  * @returns updated dependency container
  */
-export default function registerBaseDependencies(di: AwilixContainer): AwilixContainer<Dependencies> {
+export default function registerBaseDependencies(
+  di: AwilixContainer,
+  config: ConfigType,
+): AwilixContainer<Dependencies> {
   di.register({
-    config: asValue(CONFIG),
+    config: asValue(config),
   });
 
   di.register({
