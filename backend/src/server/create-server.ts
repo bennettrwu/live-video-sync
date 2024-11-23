@@ -4,7 +4,6 @@ import Fastify from 'fastify';
 import fastifyAutoload from '@fastify/autoload';
 import {fastifyAwilixPlugin} from '@fastify/awilix';
 import {AwilixContainer} from 'awilix';
-import {v4 as uuidv4} from 'uuid';
 
 const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,7 +30,7 @@ export default function createServer(dependencyContainer: AwilixContainer<Depend
     connectionTimeout: config.server.connectionTimeout,
     requestTimeout: config.server.requestTimeout,
     disableRequestLogging: true,
-  }).setGenReqId(req => (req.headers['request-id'] || req.headers['x-request-id'] || uuidv4()) as string);
+  });
 
   // Register dependency injection container
   fastify.register(fastifyAwilixPlugin, {
