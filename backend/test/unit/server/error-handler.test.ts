@@ -63,6 +63,15 @@ describe('Error handler', () => {
       expect(response.json()).toEqual({statusCode: 403, success: false, message: errorMessage, requestId});
     });
 
+    it('returns correct response on not found errors', async ({fastify, routeHandlerMock}) => {
+      routeHandlerMock.mockRejectedValue(new HTTP_ERRORS.NOT_FOUND(errorMessage));
+
+      const response = await fastify.inject({method: 'GET', url: '/test'});
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json()).toEqual({statusCode: 404, success: false, message: errorMessage, requestId});
+    });
+
     it('returns correct response on internal server errors', async ({fastify, routeHandlerMock}) => {
       routeHandlerMock.mockRejectedValue(new HTTP_ERRORS.INTERNAL_SERVER_ERROR(errorMessage));
 
