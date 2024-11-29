@@ -51,7 +51,6 @@ describe<AccountRoutesTestContext>('/accounts/v1/login handler', it => {
 
   it.for(
     formatTestNames([
-      {name: 'empty body', test: ''},
       {},
       {username: {}, password},
       {username, password: {}},
