@@ -2,15 +2,6 @@
 import inject from 'light-my-request';
 import {expect} from 'vitest';
 
-export function checkBadRequestResponseFormat(response: inject.Response, keys: Array<string>) {
-  const body = response.json();
-
-  expect(response.statusCode).toBe(400);
-  expect(body.statusCode).toBe(400);
-  const requestErrorKeys = body.requestErrors.map(({key}: {key: string}) => key);
-  expect(requestErrorKeys).toEqual(expect.arrayContaining(keys));
-}
-
 export function checkErrorResponseFormat(response: inject.Response, code: number) {
   const body = response.json();
 

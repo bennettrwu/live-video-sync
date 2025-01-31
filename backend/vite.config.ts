@@ -14,7 +14,7 @@ export default defineConfig({
       deps: {
         inline: ['@fastify/autoload', 'awilix']
       }
-    }
+    },
   },
   resolve: {
     alias: {
