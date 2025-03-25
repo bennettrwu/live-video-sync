@@ -1,37 +1,25 @@
-import path from 'path';
-import {fileURLToPath} from 'url';
-import createDependencyContainer from './dependency-injection/create-dependency-container.js';
-import createServer from './server/create-server.js';
-import {APP_ERRORS} from './shared/errors/app-errors.js';
-import loadConfig from '@config/load-config.js';
+import dotenv from 'dotenv';
+import createLogger from './logger';
+import Fastify from 'fastify';
+import FastifyWebsocket from '@fastify/websocket';
+import {v4 as uuidv4} from 'uuid';
+import websocketHandler from './roomSyncAPIv1';
 
-const DIRNAME = path.dirname(fileURLToPath(import.meta.url));
+// Grab configuration from .env file
+dotenv.config();
 
-async function init() {
-  const config = loadConfig();
-  const dependencyContainer = await createDependencyContainer(DIRNAME, config);
+const log = createLogger(process.env.LOG_LEVEL, process.env.LOG_DEST);
 
-  const logger = dependencyContainer.resolve('logger');
-
-  const fastify = createServer(dependencyContainer);
-
-  process.on('uncaughtException', err => {
-    logger.fatal({msg: 'Uncaught exception', err});
-    throw err; // terminate on uncaught errors
-  });
-
-  process.on('unhandledRejection', reason => {
-    const err = new APP_ERRORS.UNHANDLED_REJECTION().causedBy(reason);
-    logger.fatal({msg: 'Unhandled rejection', err});
-    throw err; // terminate on uncaught rejection
-  });
-
-  try {
-    await fastify.listen({port: config.server.port, host: config.server.host});
-  } catch (err) {
-    logger.fatal({msg: 'Failed to start fastify webserver', err});
-    throw err; // terminate if fails to start
+// Setup fastify server
+const fastify = Fastify({loggerInstance: log, genReqId: () => uuidv4()});
+fastify.register(FastifyWebsocket);
+fastify.register(websocketHandler);
+fastify.listen(
+  {port: process.env.PORT ? parseInt(process.env.PORT) : 8080},
+  err => {
+    if (err) {
+      fastify.log.fatal(err);
+      throw err;
+    }
   }
-}
-
-await init();
+);

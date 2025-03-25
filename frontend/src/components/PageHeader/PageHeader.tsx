@@ -1,7 +1,7 @@
 import {useMediaQuery} from '@mantine/hooks';
 import {em} from '@mantine/core';
 
-import ThemeSelector from '../AppWrapper/ThemeSelector';
+import ThemeSelector from '../ThemeSelector/ThemeSelector';
 import './PageHeader.scss';
 
 export default function PageHeader() {

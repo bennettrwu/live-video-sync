@@ -1,8 +1,0 @@
-import {fastifySensible} from '@fastify/sensible';
-import fastifyPlugin from 'fastify-plugin';
-import {AppFastifyInstance} from '@shared/types/fastify.js';
-
-// Register fastify sensible plugin to set sensible defaults
-export default fastifyPlugin((fastify: AppFastifyInstance) => {
-  fastify.register(fastifySensible);
-});

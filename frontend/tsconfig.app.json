@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -17,7 +13,6 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["@vitest/browser/providers/playwright"],
 
     /* Linting */
     "strict": true,
@@ -26,13 +21,12 @@
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
 
+    /* Common libraries */
     "paths": {
-      "@src/*": ["./src/*"],
-      "@api/*": ["./src/api/*"]
+      "@common/*": [
+        "./node_modules/live-video-sync-common/src/*"
+      ]
     }
   },
-  "include": [
-    "src",
-    "test",
-  ]
+  "include": ["src", "test"]
 }

@@ -20,7 +20,13 @@ type PlayerExtended = {
   };
 } & Player;
 
-export function VideoPlayer({thumbnailUrl, video, subtitles, syncEngine, ...props}: VideoPlayerProps) {
+export const VideoPlayer: FC<VideoPlayerProps> = ({
+  thumbnailUrl,
+  video,
+  subtitles,
+  syncEngine,
+  ...props
+}) => {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<PlayerExtended | null>(null);
 
@@ -81,4 +87,4 @@ export function VideoPlayer({thumbnailUrl, video, subtitles, syncEngine, ...prop
       <Box ref={videoRef} />
     </Box>
   );
-}
+};

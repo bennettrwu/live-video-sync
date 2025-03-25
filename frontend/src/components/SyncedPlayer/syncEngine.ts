@@ -2,9 +2,13 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import Player from 'video.js/dist/types/player';
 
-const reconnectTimeout = 1_000;
-const syncLoopRate = 1_000;
-const ignoreUserEventListnersTimeout = 100;
+import {parseJSONMessage} from '@common/utils/parseJSONMessage';
+import {
+  parseServerSyncMessage,
+  ServerSyncState,
+} from '@common/utils/parseSyncMessage';
+
+const reconnect_timeout = 1_000;
 
 type SyncEvents = {
   joined: () => unknown;
@@ -23,23 +27,26 @@ export default class SyncEngine {
   private _playerRef?: React.RefObject<Player>;
 
   private _ws?: WebSocket;
-  private _syncLoop: number;
+  private _syncLoop: NodeJS.Timeout;
+  private _heartbeatLoop: NodeJS.Timeout;
 
   private _events = new EventEmitter() as TypedEmitter<SyncEvents>;
 
-  private _targetState = {
+  private _targetState: ServerSyncState = {
     time: 0,
     paused: true,
     syncTime: Date.now() / 1_000,
     mediaIndex: 0,
   };
 
+  private _pushStateDebounce?: NodeJS.Timeout;
+  private _pushReadyDebounce?: NodeJS.Timeout;
   private _isReady: {[key: string]: boolean} = {};
   private _ready = true;
   private _ignore = false;
 
   private _joined = false;
-  private _joinTimeout?: number;
+  private _joinTimeout?: NodeJS.Timeout;
 
   get events() {
     return this._events;
@@ -52,38 +59,44 @@ export default class SyncEngine {
     fetch(`/roomSyncAPI/v1/${roomId}/mediaList`)
       .then(response => response.json())
       .then(json => {
-        // Todo: Types and validation for this
+        // Todo: Types for this
         this._mediaList = json;
         this._events.emit('mediaListUpdate', this._mediaList as []);
-      })
-      .catch(() => {});
+      });
 
     this._connectWebsocket(roomId);
 
-    this._syncLoop = setInterval(async () => {
+    this._heartbeatLoop = setInterval(() => {
+      this._ws?.send(JSON.stringify({type: 'heartbeat'}));
+    }, 60_000);
+
+    this._syncLoop = setInterval(() => {
+      if (!this._targetState.paused) {
+        this._targetState.time += 0.5;
+      }
       const time = this._playerRef?.current?.currentTime();
       if (typeof time === 'undefined') return;
 
       this._ignore = true;
+
       if (this._allReady()) {
         this._videojsRef?.current?.classList.remove('vjs-waiting');
 
-        const targetTime = this._targetState.paused
-          ? this._targetState.time
-          : this._targetState.time + (Date.now() / 1_000 - this._targetState.syncTime);
+        const targetTime = this._targetState.time;
         if (Math.abs(time - targetTime) > 1) {
           this._playerRef?.current?.currentTime(targetTime);
 
-          await (this._targetState.paused ? this._playerRef?.current?.pause() : this._playerRef?.current?.play());
+          this._targetState.paused
+            ? this._playerRef?.current?.pause()
+            : this._playerRef?.current?.play();
         }
       } else {
         // Fake buffering
         this._playerRef?.current?.pause();
         this._videojsRef?.current?.classList.add('vjs-waiting');
       }
-
-      setTimeout(() => (this._ignore = false), ignoreUserEventListnersTimeout);
-    }, syncLoopRate);
+      setTimeout(() => (this._ignore = false), 100);
+    }, 500);
   }
 
   private _allReady() {
@@ -91,7 +104,6 @@ export default class SyncEngine {
 
     for (const value of Object.values(this._isReady)) {
       if (!value) {
-        console.log(value);
         return false;
       }
     }
@@ -115,16 +127,17 @@ export default class SyncEngine {
     this._ws.addEventListener('close', e => {
       console.log('Websocket closed', e);
       this._joined = false;
-      setTimeout(() => this._connectWebsocket(roomId), reconnectTimeout);
+      setTimeout(() => this._connectWebsocket(roomId), reconnect_timeout);
     });
 
     this._ws.addEventListener('open', e => console.log('Websocket opened', e));
 
     this._ws.addEventListener('message', msg => {
       try {
-        const message = JSON.parse(msg.data);
+        const jsonObject = parseJSONMessage(msg.data);
+        const message = parseServerSyncMessage(jsonObject);
 
-        console.log(`Received State ${JSON.stringify(message)}`);
+        console.log(`Received Message ${JSON.stringify(message)}`);
 
         if (message.type === 'join') {
           this._isReady[message.uuid] = false;
@@ -159,30 +172,46 @@ export default class SyncEngine {
 
   private _pushStateUpdate() {
     if (this._ignore) return;
+    clearTimeout(this._pushStateDebounce);
 
-    const paused = this._playerRef?.current?.paused();
-    const time = this._playerRef?.current?.currentTime();
-    if (typeof paused !== 'boolean' || typeof time !== 'number') return;
+    this._pushStateDebounce = setTimeout(() => {
+      const paused = this._playerRef?.current?.paused();
+      const time = this._playerRef?.current?.currentTime();
+      if (typeof paused !== 'boolean' || typeof time !== 'number') return;
 
-    // Todo: Wrap send and stringfy into new send method for type checking message
-    this._ws?.send(
-      JSON.stringify({
-        type: 'state',
-        time,
-        paused,
-        mediaIndex: this._targetState.mediaIndex,
-      }),
-    );
+      // Todo: Wrap send and stringfy into new send method for type checking message
+      this._ws?.send(
+        JSON.stringify({
+          type: 'state',
+          time,
+          paused,
+          mediaIndex: this._targetState.mediaIndex,
+        })
+      );
+    }, 100);
+  }
+
+  private _pushReadyUpdate() {
+    clearTimeout(this._pushReadyDebounce);
+    this._pushReadyDebounce = setTimeout(() => {
+      if (this._ready) {
+        this._ws?.send(JSON.stringify({type: 'ready'}));
+      } else {
+        this._ws?.send(JSON.stringify({type: 'unready'}));
+      }
+    }, 100);
   }
 
   private _onReady() {
     this._ws?.send(JSON.stringify({type: 'ready'}));
     this._ready = true;
+    this._pushReadyUpdate();
   }
 
   private _onUnready() {
     this._ws?.send(JSON.stringify({type: 'unready'}));
     this._ready = false;
+    this._pushReadyUpdate();
   }
 
   private _registerUserEventListeners() {
@@ -199,7 +228,10 @@ export default class SyncEngine {
     this._playerRef?.current?.off('waiting', this._onUnready);
   }
 
-  registerPlayerRef(videojsRef: React.RefObject<HTMLDivElement>, playerRef: React.RefObject<Player>) {
+  registerPlayerRef(
+    videojsRef: React.RefObject<HTMLDivElement>,
+    playerRef: React.RefObject<Player>
+  ) {
     this._videojsRef = videojsRef;
     this._playerRef = playerRef;
 
@@ -230,5 +262,6 @@ export default class SyncEngine {
     this._ws?.close();
     this._unregisterPlayerListeners();
     clearTimeout(this._syncLoop);
+    clearTimeout(this._heartbeatLoop);
   }
 }

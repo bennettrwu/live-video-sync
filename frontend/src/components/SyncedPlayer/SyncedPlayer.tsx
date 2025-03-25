@@ -1,8 +1,5 @@
 import {VideoPlayer} from './VideoPlayer';
 
-// import video_url from '/frieren/video.m3u8?url';
-// import sub_url from '/frieren/subtitles.vtt?url';
-// import thumbnail_url from '/frieren/thumbnail.png?url';
 import {useEffect, useState} from 'react';
 import SyncEngine from './syncEngine';
 import {Button} from '@mantine/core';
@@ -18,6 +15,7 @@ export default function SyncedPlayer() {
       name: string;
       video: {src: string; type: string};
       subtitles?: {src: string; langugage: string; label: string};
+      thumbnailUrl?: string;
       index: number;
     }>
   >([]);
@@ -43,12 +41,14 @@ export default function SyncedPlayer() {
           key={mediaIndex}
           video={mediaList[mediaIndex].video}
           subtitles={mediaList[mediaIndex].subtitles}
+          thumbnailUrl={mediaList[mediaIndex].thumbnailUrl}
           syncEngine={syncEngine}
         />
       )}
       <div className="media-list">
         {mediaList.map(({name, index}) => (
           <Button
+            key={index}
             className="media-list-element"
             fullWidth={true}
             onClick={() => {
