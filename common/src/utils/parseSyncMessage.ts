@@ -69,6 +69,7 @@ export function parseServerSyncMessage(
   if (jsonObject.type === 'unready') return {type: 'unready', uuid};
   if (jsonObject.type === 'join') return {type: 'join', uuid};
   if (jsonObject.type === 'leave') return {type: 'leave', uuid};
+  if (jsonObject.type === 'heartbeat') return {type: 'heartbeat', uuid};
 
   if (jsonObject.type !== 'state') {
     throw new InvalidSyncMessage('Message has missing or invalid type field');
