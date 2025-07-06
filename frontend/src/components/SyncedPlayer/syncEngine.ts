@@ -249,7 +249,6 @@ export default class SyncEngine extends EventEmitter {
 
     // If target is paused, ensure player matches
     if (this._targetState.paused) {
-      this._stopBuffering();
       if (!currentState.paused) {
         this._videoInterface.silentPause();
       }
