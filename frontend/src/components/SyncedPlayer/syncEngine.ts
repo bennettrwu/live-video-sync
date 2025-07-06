@@ -255,6 +255,7 @@ export default class SyncEngine extends EventEmitter {
       if (!currentState.paused) {
         this._videoInterface.silentPause();
       }
+      return;
     } else {
       this._stopWaiting();
     }
