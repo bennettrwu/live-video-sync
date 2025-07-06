@@ -267,7 +267,9 @@ export default class SyncEngine extends EventEmitter {
 
       // If we are not buffering but waiting, start waiting screen
       if (waiting) {
-        this._targetState.currentTime = targetTime;
+        if (!this._sentStartWaiting) {
+          this._targetState.currentTime = targetTime;
+        }
         this._startWaiting();
 
         if (!currentState.paused) {
