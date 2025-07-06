@@ -28,26 +28,9 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
   fastify.get('/roomSyncAPI/v1/:roomId/mediaList', (req, reply) => {
     reply.send([
       {
-        name: 'Frieren 28',
-        video: {src: '/frieren28/video.m3u8', type: 'application/x-mpegURL'},
-        subtitles: {
-          src: '/frieren28/subtitles.vtt',
-          langugage: 'en',
-          label: 'English',
-        },
-        thumbnailUrl: '/frieren28/thumbnail.png',
+        name: 'Test',
+        video: '/test/master.m3u8',
         index: 0,
-      },
-      {
-        name: 'Frieren Maru Maru',
-        video: {src: '/frieren/video.m3u8', type: 'application/x-mpegURL'},
-        subtitles: {
-          src: '/frieren/subtitles.vtt',
-          langugage: 'en',
-          label: 'English',
-        },
-        thumbnailUrl: '/frieren/thumbnail.png',
-        index: 1,
       },
     ]);
   });

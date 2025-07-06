@@ -59,6 +59,7 @@ export default function SyncedPlayer() {
           src={VIDEO_URL}
           muted={true}
           autoPlay={true}
+          controlsList="noplaybackrate"
         />
       </div>
       <div className="media-list">

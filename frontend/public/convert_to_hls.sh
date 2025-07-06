@@ -8,17 +8,31 @@ set -e
 # Create single track file using video stream 0, audio stream 0, subtitle stream 0
 ffmpeg -i $1 -map 0:v:0 -map 0:a:0 -map 0:s:0 -c copy single_track.mkv
 
-# Extract subtitles
-ffmpeg -i single_track.mkv -f webvtt $2/subtitles.vtt
+# Assuming input video is h264 and audio is aac
+ffmpeg -i single_track.mkv \
+    -map 0:v:0 -map 0:a:0 -map 0:s:0 \
+    -c:v copy -c:a copy -c:s webvtt \
+    -var_stream_map "v:0,a:0,s:0" \
+    -hls_playlist_type vod \
+    -hls_time 6 \
+    -master_pl_name master.m3u8 \
+    -f hls $2/stream_%v.m3u8
 
-# Assuming supported video codec
-ffmpeg -i single_track.mkv -c:v copy -c:a copy -sn -hls_list_size 0 -f hls $2/video.m3u8
+echo '#EXTM3U
 
-# If reencoding is needed
-# ffmpeg -i input.mkv -sn -hls_list_size 0 -f hls  $2/video.m3u8
+#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=subs,NAME=English,LANGUAGE=en,AUTOSELECT=YES,DEFAULT=YES,URI=./stream_0_vtt.m3u8
 
-ffmpeg -i $1 -ss 00:00:01.000 -vframes 1 $2/thumbnail.png
+#EXT-X-STREAM-INF:BANDWIDTH=8000000,CODECS=avc1.640029,mp4a.40.2,SUBTITLES=subs
+stream_0.m3u8
 
+' > $2/master.m3u8
 
-
-
+# If need to reencode
+#ffmpeg -i single_track.mkv \
+#    -map 0:v:0 -map 0:a:0 -map 0:s:0 \
+#    -c:v h264 -c:a aac -c:s webvtt \
+#    -var_stream_map "v:0,a:0,s:0" \
+#    -hls_playlist_type vod \
+#    -hls_time 6 \
+#    -master_pl_name master.m3u8 \
+#    -f hls $2/video_%v.m3u8

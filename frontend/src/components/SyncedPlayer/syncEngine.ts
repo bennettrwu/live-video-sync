@@ -3,9 +3,7 @@ import SilencedVideoPlayerInterface from './silencedVideoPlayerInterface';
 
 export type MediaList = Array<{
   name: string;
-  video: {src: string; type: string};
-  subtitles?: {src: string; langugage: string; label: string};
-  thumbnailUrl?: string;
+  video: string;
   index: number;
 }>;
 
@@ -187,7 +185,7 @@ export default class SyncEngine extends EventEmitter {
   private _silentSetMediaIndex(index: number) {
     console.log(`syncEngine._silentSetMediaIndex(${index})`);
     // TODO: Bounds checking
-    this._videoInterface.setVideoSource(this._mediaList[index].video.src);
+    this._videoInterface.setVideoSource(this._mediaList[index].video);
     this.emit('updateMediaList', this._mediaList, index);
   }
 
