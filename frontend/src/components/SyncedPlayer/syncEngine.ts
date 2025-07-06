@@ -230,6 +230,13 @@ export default class SyncEngine extends EventEmitter {
     this.emit('stopWaiting');
   }
 
+  private _getTargetTime() {
+    return this._targetState.paused
+      ? this._targetState.currentTime
+      : (Date.now() - this._targetState.updateTime) / 1000 +
+          this._targetState.currentTime;
+  }
+
   private _syncLoopIteration() {
     console.log('syncEngine._syncLoopIteration()');
     this._syncLoop = setTimeout(this._syncLoopIteration, 100);
@@ -238,10 +245,7 @@ export default class SyncEngine extends EventEmitter {
     if (!currentState) return;
     console.log(this._roomBufferStatus);
 
-    const targetTime = this._targetState.paused
-      ? this._targetState.currentTime
-      : (Date.now() - this._targetState.updateTime) / 1000 +
-        this._targetState.currentTime;
+    const targetTime = this._getTargetTime();
     const syncDelta = currentState.currentTime - targetTime;
 
     // Check if others are buffering
@@ -253,12 +257,17 @@ export default class SyncEngine extends EventEmitter {
       }
     }
 
+    if (currentState.buffering || waiting) {
+      this._targetState.updateTime = Date.now();
+    }
+
     // If we are not buffering, send stop buffering message
     if (!currentState.buffering) {
       this._stopBuffering();
 
       // If we are not buffering but waiting, start waiting screen
       if (waiting) {
+        this._targetState.currentTime = targetTime;
         this._startWaiting();
 
         if (!currentState.paused) {
@@ -285,6 +294,7 @@ export default class SyncEngine extends EventEmitter {
     // If video is currently buffering and out of sync, send buffering message
     if (currentState.buffering) {
       if (syncDelta < -0.5) {
+        this._targetState.currentTime = targetTime;
         this._startBuffering();
       }
       return;
