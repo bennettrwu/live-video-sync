@@ -1,7 +1,8 @@
-import {Button, Center, Group} from '@mantine/core';
+import {Button} from '@mantine/core';
 import {useEffect, useRef, useState} from 'react';
 import SyncEngine, {type MediaList} from './syncEngine';
-import SilencedVideoPlayerInterface from './silencedVideoPlayerInterface';
+
+import './SyncedPlayer.scss';
 
 const VIDEO_URL = './frieren28/video.m3u8';
 

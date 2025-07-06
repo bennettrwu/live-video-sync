@@ -28,9 +28,14 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
   fastify.get('/roomSyncAPI/v1/:roomId/mediaList', (req, reply) => {
     reply.send([
       {
-        name: 'Test',
-        video: '/test/master.m3u8',
+        name: 'Test 0',
+        video: '/test0/master.m3u8',
         index: 0,
+      },
+      {
+        name: 'Test 1',
+        video: '/test1/master.m3u8',
+        index: 1,
       },
     ]);
   });
