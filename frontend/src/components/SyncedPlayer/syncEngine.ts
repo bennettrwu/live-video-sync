@@ -185,9 +185,9 @@ export default class SyncEngine extends EventEmitter {
   private _resetRoomBufferStatus() {
     console.log('syncEngine._resetRoomBufferStatus()');
 
-    for (const uuid in this._roomBufferStatus) {
-      this._roomBufferStatus[uuid] = false;
-    }
+    // for (const uuid in this._roomBufferStatus) {
+    //   this._roomBufferStatus[uuid] = false;
+    // }
   }
 
   private _silentSetMediaIndex(index: number) {
@@ -253,22 +253,22 @@ export default class SyncEngine extends EventEmitter {
       }
     }
 
-    // Don't wait if self is buffering
-    if (waiting && !currentState.buffering) {
-      if (this._targetState.paused) {
-        this._stopWaiting();
-      }
+    // If we are not buffering, send stop buffering message
+    if (!currentState.buffering) {
+      this._stopBuffering();
 
-      // if so, fake buffering
-      this._startWaiting();
+      // If we are not buffering but waiting, start waiting screen
+      if (waiting) {
+        this._startWaiting();
 
-      if (!currentState.paused) {
-        this._videoInterface.silentPause();
+        if (!currentState.paused) {
+          this._videoInterface.silentPause();
+        }
+        return;
       }
-      return;
-    } else if (!currentState.buffering) {
-      this._stopWaiting();
     }
+    // Not waiting, stop waiting screen
+    this._stopWaiting();
 
     // If target is paused, ensure player matches
     if (this._targetState.paused) {
@@ -288,9 +288,6 @@ export default class SyncEngine extends EventEmitter {
         this._startBuffering();
       }
       return;
-    } else {
-      // Back in sync
-      this._stopBuffering();
     }
 
     // If target is not paused, ensure player matches
