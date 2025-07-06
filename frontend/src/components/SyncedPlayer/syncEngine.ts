@@ -265,8 +265,7 @@ export default class SyncEngine extends EventEmitter {
         this._startBuffering();
       }
       return;
-    }
-    if (Math.abs(syncDelta) < 0.5) {
+    } else {
       // Back in sync
       this._stopBuffering();
     }
