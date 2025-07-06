@@ -3,7 +3,9 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 
 type RoomEvents = {
-  [key: string]: (syncState: string) => unknown;
+  [key: string]: (
+    syncState: {[key: string]: string} & {uuid: string}
+  ) => unknown;
 };
 
 /**
@@ -70,7 +72,7 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
     (ws, req) => {
       const roomId = (req.params as {roomId: string}).roomId;
       const uuid = req.id;
-      if (!room_states[roomId]) {
+      if (!(roomId in room_states)) {
         room_states[roomId] = {
           paused: true,
           mediaIndex: 0,
@@ -79,8 +81,9 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
         };
       }
 
-      function sendSyncState(state: string) {
-        ws.send(state);
+      function sendSyncState(state: {uuid: string}) {
+        if (state.uuid === uuid) return;
+        ws.send(JSON.stringify(state));
       }
       room_events.on(roomId, sendSyncState);
 
@@ -97,12 +100,11 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
           currentTime: targetTime,
         })
       );
-      room_events.emit(roomId, JSON.stringify({type: 'join', uuid}));
 
       ws.on('close', code => {
         req.log.info({msg: 'Websocket closed', code});
         room_events.removeListener(roomId, sendSyncState);
-        room_events.emit(roomId, JSON.stringify({type: 'leave', uuid}));
+        room_events.emit(roomId, {type: 'leave', uuid});
       });
 
       ws.on('error', err => {
@@ -116,34 +118,27 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
         }
 
         const message = JSON.parse(data.toString());
+        console.log(message);
 
         if (message.type === 'heartbeat') {
           ws.send(JSON.stringify({type: 'heartbeat', uuid}));
         } else if (message.type === 'startBuffering') {
-          room_events.emit(
-            roomId,
-            JSON.stringify({type: 'startBuffering', uuid})
-          );
-        } else if (message.type === 'endBuffering') {
-          room_events.emit(
-            roomId,
-            JSON.stringify({type: 'endBuffering', uuid})
-          );
+          room_events.emit(roomId, {type: 'startBuffering', uuid});
+        } else if (message.type === 'stopBuffering') {
+          room_events.emit(roomId, {type: 'stopBuffering', uuid});
         } else if (message.type === 'targetStateUpdate') {
           room_states[roomId].paused = message.paused;
           room_states[roomId].mediaIndex = message.mediaIndex;
           room_states[roomId].currentTime = message.currentTime;
           room_states[roomId].updateTime = Date.now();
 
-          room_events.emit(
-            roomId,
-            JSON.stringify({
-              type: 'targetStateUpdate',
-              paused: message.paused,
-              mediaIndex: message.mediaIndex,
-              currentTime: message.currentTime,
-            })
-          );
+          room_events.emit(roomId, {
+            type: 'targetStateUpdate',
+            paused: message.paused,
+            mediaIndex: message.mediaIndex,
+            currentTime: message.currentTime,
+            uuid,
+          });
         }
       });
     }

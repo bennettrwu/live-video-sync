@@ -31,6 +31,8 @@ export default class SyncEngine extends EventEmitter {
   };
   private _roomBufferStatus: {[key: string]: boolean} = {};
 
+  private _sentStartWaiting = false;
+
   constructor(roomId: string, videoRef: React.RefObject<HTMLVideoElement>) {
     super();
     console.log('SyncEngine.constructor()');
@@ -49,15 +51,15 @@ export default class SyncEngine extends EventEmitter {
     // Init video interface
     this._videoInterface = new SilencedVideoPlayerInterface(videoRef);
     this._videoInterface.on('play', state => {
-      console.log('play');
+      console.log('play', state);
       this._targetStateUpdate(state);
     });
     this._videoInterface.on('pause', state => {
-      console.log('pause');
+      console.log('pause', state);
       this._targetStateUpdate(state);
     });
     this._videoInterface.on('seek', state => {
-      console.log('seek');
+      console.log('seek', state);
       this._targetStateUpdate(state);
     });
 
@@ -65,21 +67,13 @@ export default class SyncEngine extends EventEmitter {
     this._syncLoop = setTimeout(this._syncLoopIteration, 100);
   }
 
-  private _silentSetMediaIndex(index: number) {
-    console.log('syncEngine._silentSetMediaIndex()');
+  setMediaIndex(index: number) {
+    console.log(`syncEngine.setMediaIndex(${index})`);
     // TODO: Bounds checking
     this._targetState.currentTime = 0;
-    this._targetState.updateTime = Date.now();
     this._targetState.mediaIndex = index;
-    this._videoInterface.setVideoSource(this._mediaList[index].video.src);
-    this.emit('updateMediaList', this._mediaList, this._targetState.mediaIndex);
-  }
-
-  setMediaIndex(index: number) {
-    console.log('syncEngine.setMediaIndex()');
-    // TODO: Bounds checking
     this._silentSetMediaIndex(index);
-    this._targetStateUpdate({mediaIndex: index});
+    this._targetStateUpdate(this._targetState);
   }
 
   destroy() {
@@ -107,7 +101,7 @@ export default class SyncEngine extends EventEmitter {
       .then(json => {
         // Todo: Type check for this
         this._mediaList = json;
-        this.setMediaIndex(this._targetState.mediaIndex);
+        this._silentSetMediaIndex(this._targetState.mediaIndex);
         this.emit(
           'updateMediaList',
           this._mediaList,
@@ -134,20 +128,18 @@ export default class SyncEngine extends EventEmitter {
   }
 
   private _wsMessage(event: MessageEvent) {
-    console.log('syncEngine._wsMessage()');
+    console.log(`syncEngine._wsMessage(${event.data.toString()})`);
 
     const data = event.data;
 
     const message = JSON.parse(data.toString());
     console.log('ws message', message);
 
-    if (message.type === 'join') {
-      this._roomBufferStatus[message.uuid] = false;
-    } else if (message.type === 'leave') {
+    if (message.type === 'leave') {
       delete this._roomBufferStatus[message.uuid];
     } else if (message.type === 'startBuffering') {
       this._roomBufferStatus[message.uuid] = true;
-    } else if (message.type === 'endBuffering') {
+    } else if (message.type === 'stopBuffering') {
       this._roomBufferStatus[message.uuid] = false;
     } else if (message.type === 'targetStateUpdate') {
       if (this._targetState.mediaIndex !== message.mediaIndex) {
@@ -173,11 +165,11 @@ export default class SyncEngine extends EventEmitter {
   }
 
   private _targetStateUpdate(state: {
-    paused?: boolean;
-    mediaIndex?: number;
-    currentTime?: number;
+    paused: boolean;
+    mediaIndex: number;
+    currentTime: number;
   }) {
-    console.log('syncEngine._targetStateUpdate()');
+    console.log(`syncEngine._targetStateUpdate(${JSON.stringify(state)})`);
 
     Object.assign(this._targetState, state);
     this._targetState.updateTime = Date.now();
@@ -190,6 +182,13 @@ export default class SyncEngine extends EventEmitter {
         currentTime: this._targetState.currentTime,
       })
     );
+  }
+
+  private _silentSetMediaIndex(index: number) {
+    console.log(`syncEngine._silentSetMediaIndex(${index})`);
+    // TODO: Bounds checking
+    this._videoInterface.setVideoSource(this._mediaList[index].video.src);
+    this.emit('updateMediaList', this._mediaList, index);
   }
 
   private _startBuffering() {
@@ -205,25 +204,52 @@ export default class SyncEngine extends EventEmitter {
 
     if (!this._wsSentStartBuffer) return;
     this._wsSentStartBuffer = false;
-    this._ws.send(JSON.stringify({type: '_stopBuffering'}));
+    this._ws.send(JSON.stringify({type: 'stopBuffering'}));
+  }
+
+  private _startWaiting() {
+    console.log('syncEngine._startWaiting()');
+
+    if (this._sentStartWaiting) return;
+    this._sentStartWaiting = true;
+    this.emit('startWaiting');
+  }
+
+  private _stopWaiting() {
+    console.log('syncEngine._stopWaiting()');
+
+    if (!this._sentStartWaiting) return;
+    this._sentStartWaiting = false;
+    this.emit('stopWaiting');
   }
 
   private _syncLoopIteration() {
     console.log('syncEngine._syncLoopIteration()');
     this._syncLoop = setTimeout(this._syncLoopIteration, 100);
 
+    const currentState = this._videoInterface.getCurrentState();
+    if (!currentState) return;
+
     const targetTime = this._targetState.paused
       ? this._targetState.currentTime
       : (Date.now() - this._targetState.updateTime) / 1000 +
         this._targetState.currentTime;
-
-    const currentState = this._videoInterface.getCurrentState();
-    if (!currentState) return;
     const syncDelta = currentState.currentTime - targetTime;
 
-    console.log('target', this._targetState);
-    console.log('current', currentState);
+    // Check if others are buffering
+    for (const uuid in this._roomBufferStatus) {
+      if (this._roomBufferStatus[uuid]) {
+        // if so, fake buffering
+        if (!currentState.paused) {
+          this._videoInterface.silentPause();
+        }
+        this._startWaiting();
+        return;
+      }
+    }
+    this._stopWaiting();
 
+    // If target is paused, ensure player matches
     if (this._targetState.paused) {
       if (!currentState.paused) {
         this._videoInterface.silentPause();
@@ -235,6 +261,19 @@ export default class SyncEngine extends EventEmitter {
       return;
     }
 
+    // If video is currently buffering and out of sync, send buffering message
+    if (currentState.buffering) {
+      if (syncDelta < -1) {
+        this._startBuffering();
+      }
+      return;
+    }
+    if (Math.abs(syncDelta) < 0.5) {
+      // Back in sync
+      this._stopBuffering();
+    }
+
+    // If target is not paused, ensure player matches
     if (currentState.paused) {
       this._videoInterface.silentPlay();
     }
@@ -242,12 +281,6 @@ export default class SyncEngine extends EventEmitter {
     if (Math.abs(syncDelta) > 0.5) {
       this._videoInterface.silentSeek(targetTime);
       return;
-    }
-
-    if (currentState.buffering && syncDelta < 0.5) {
-      this._startBuffering();
-    } else if (Math.abs(syncDelta) < 0.5) {
-      this._stopBuffering();
     }
   }
 }
