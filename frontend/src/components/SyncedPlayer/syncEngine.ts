@@ -253,7 +253,8 @@ export default class SyncEngine extends EventEmitter {
       }
     }
 
-    if (waiting) {
+    // Don't wait if self is buffering
+    if (waiting && !currentState.buffering) {
       if (this._targetState.paused) {
         this._stopWaiting();
       }
