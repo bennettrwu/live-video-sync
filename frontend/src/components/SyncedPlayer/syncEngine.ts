@@ -235,17 +235,29 @@ export default class SyncEngine extends EventEmitter {
     const syncDelta = currentState.currentTime - targetTime;
 
     // Check if others are buffering
+    let waiting = false;
     for (const uuid in this._roomBufferStatus) {
       if (this._roomBufferStatus[uuid]) {
-        // if so, fake buffering
-        if (!currentState.paused) {
-          this._videoInterface.silentPause();
-        }
-        this._startWaiting();
-        return;
+        waiting = true;
+
+        break;
       }
     }
-    this._stopWaiting();
+
+    if (waiting) {
+      if (this._targetState.paused) {
+        this._stopWaiting();
+      }
+
+      // if so, fake buffering
+      this._startWaiting();
+
+      if (!currentState.paused) {
+        this._videoInterface.silentPause();
+      }
+    } else {
+      this._stopWaiting();
+    }
 
     // If target is paused, ensure player matches
     if (this._targetState.paused) {
