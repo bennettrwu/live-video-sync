@@ -22,11 +22,7 @@
     "esModuleInterop": true,
 
     /* Common libraries */
-    "paths": {
-      "@common/*": [
-        "./node_modules/live-video-sync-common/src/*"
-      ]
-    }
+    "paths": {}
   },
   "include": ["src", "test"]
 }

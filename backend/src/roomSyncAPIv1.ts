@@ -2,12 +2,6 @@ import {FastifyInstance} from 'fastify';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 
-import {parseJSONMessage} from '@common/utils/parseJSONMessage';
-import {
-  parseClientSyncMessage,
-  type ServerSyncMessage,
-} from '@common/utils/parseSyncMessage';
-
 type RoomEvents = {
   [key: string]: (syncState: string) => unknown;
 };
@@ -20,28 +14,37 @@ type RoomEvents = {
  */
 export default function roomSyncAPIv1(fastify: FastifyInstance) {
   const room_events = new EventEmitter() as TypedEmitter<RoomEvents>;
+  const room_states: {
+    [key: string]: {
+      paused: boolean;
+      mediaIndex: number;
+      currentTime: number;
+      updateTime: number;
+    };
+  } = {};
+
   fastify.get('/roomSyncAPI/v1/:roomId/mediaList', (req, reply) => {
     reply.send([
       {
-        name: 'Test 1',
-        video: {src: '/test1/video.m3u8', type: 'application/x-mpegURL'},
+        name: 'Frieren 28',
+        video: {src: '/frieren28/video.m3u8', type: 'application/x-mpegURL'},
         subtitles: {
-          src: '/test1/subtitles.vtt',
+          src: '/frieren28/subtitles.vtt',
           langugage: 'en',
           label: 'English',
         },
-        thumbnailUrl: '/test1/thumbnail.png',
+        thumbnailUrl: '/frieren28/thumbnail.png',
         index: 0,
       },
       {
-        name: 'Test 2',
-        video: {src: '/test2/video.m3u8', type: 'application/x-mpegURL'},
+        name: 'Frieren Maru Maru',
+        video: {src: '/frieren/video.m3u8', type: 'application/x-mpegURL'},
         subtitles: {
-          src: '/test2/subtitles.vtt',
+          src: '/frieren/subtitles.vtt',
           langugage: 'en',
           label: 'English',
         },
-        thumbnailUrl: '/test2/thumbnail.png',
+        thumbnailUrl: '/frieren/thumbnail.png',
         index: 1,
       },
     ]);
@@ -67,57 +70,80 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
     (ws, req) => {
       const roomId = (req.params as {roomId: string}).roomId;
       const uuid = req.id;
+      if (!room_states[roomId]) {
+        room_states[roomId] = {
+          paused: true,
+          mediaIndex: 0,
+          currentTime: 0,
+          updateTime: Date.now(),
+        };
+      }
 
-      room_events.emit(
-        roomId,
+      function sendSyncState(state: string) {
+        ws.send(state);
+      }
+      room_events.on(roomId, sendSyncState);
+
+      const targetState = room_states[roomId];
+      const targetTime = targetState.paused
+        ? targetState.currentTime
+        : (Date.now() - targetState.updateTime) / 1000 +
+          targetState.currentTime;
+      ws.send(
         JSON.stringify({
-          type: 'join',
-          uuid,
+          type: 'targetStateUpdate',
+          paused: targetState.paused,
+          mediaIndex: targetState.mediaIndex,
+          currentTime: targetTime,
         })
       );
+      room_events.emit(roomId, JSON.stringify({type: 'join', uuid}));
 
-      // When room has an update, send it to client
-      const sendSyncState = (syncState: string) => {
-        ws.send(syncState);
-      };
-      room_events.on(roomId, sendSyncState);
+      ws.on('close', code => {
+        req.log.info({msg: 'Websocket closed', code});
+        room_events.removeListener(roomId, sendSyncState);
+        room_events.emit(roomId, JSON.stringify({type: 'leave', uuid}));
+      });
 
       ws.on('error', err => {
         req.log.error({err});
       });
 
-      ws.once('close', code => {
-        room_events.emit(roomId, JSON.stringify({type: 'leave', uuid}));
-        room_events.removeListener(roomId, sendSyncState);
-        req.log.info({msg: 'Websocket closed', code});
-      });
-
-      // When client has an update, emit room update event
       ws.on('message', (data, isBinary) => {
-        try {
-          const syncTime = Date.now() / 1_000;
+        if (isBinary) {
+          // TODO: Error handling
+          return;
+        }
 
-          const jsonObject = parseJSONMessage(data, isBinary);
-          req.log.debug({msg: 'Parsed JSON', jsonObject});
+        const message = JSON.parse(data.toString());
 
-          const message = parseClientSyncMessage(jsonObject);
+        if (message.type === 'heartbeat') {
+          ws.send(JSON.stringify({type: 'heartbeat', uuid}));
+        } else if (message.type === 'startBuffering') {
+          room_events.emit(
+            roomId,
+            JSON.stringify({type: 'startBuffering', uuid})
+          );
+        } else if (message.type === 'endBuffering') {
+          room_events.emit(
+            roomId,
+            JSON.stringify({type: 'endBuffering', uuid})
+          );
+        } else if (message.type === 'targetStateUpdate') {
+          room_states[roomId].paused = message.paused;
+          room_states[roomId].mediaIndex = message.mediaIndex;
+          room_states[roomId].currentTime = message.currentTime;
+          room_states[roomId].updateTime = Date.now();
 
-          if (message.type === 'heartbeat') {
-            ws.send(
-              JSON.stringify({type: 'heartbeat', uuid} as ServerSyncMessage)
-            );
-            return;
-          }
-
-          Object.assign(message, {uuid});
-          if (message.type === 'state') Object.assign(message, {syncTime});
-
-          room_events.emit(roomId, JSON.stringify(message));
-        } catch (err) {
-          req.log.warn({err});
-
-          // TODO Error handle
-          ws.close();
+          room_events.emit(
+            roomId,
+            JSON.stringify({
+              type: 'targetStateUpdate',
+              paused: message.paused,
+              mediaIndex: message.mediaIndex,
+              currentTime: message.currentTime,
+            })
+          );
         }
       });
     }

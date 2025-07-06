@@ -4,7 +4,6 @@
   "main": "build/index.js",
   "type": "commonjs",
   "scripts": {
-    "postinstall": "npm link ../common",
     "lint": "gts lint",
     "clean": "gts clean",
     "fix": "gts fix",

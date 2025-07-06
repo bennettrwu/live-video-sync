@@ -1,50 +1,38 @@
-import {VideoPlayer} from './VideoPlayer';
+import {Button, Group} from '@mantine/core';
+import {useEffect, useRef, useState} from 'react';
+import SyncEngine, {type MediaList} from './syncEngine';
+import SilencedVideoPlayerInterface from './silencedVideoPlayerInterface';
 
-import {useEffect, useState} from 'react';
-import SyncEngine from './syncEngine';
-import {Button} from '@mantine/core';
-
-import './SyncedPlayer.scss';
-
-const roomId = 'test-room';
+const VIDEO_URL = './frieren28/video.m3u8';
 
 export default function SyncedPlayer() {
-  const [syncEngine, setSyncEngine] = useState<SyncEngine | undefined>();
-  const [mediaList, setMediaList] = useState<
-    Array<{
-      name: string;
-      video: {src: string; type: string};
-      subtitles?: {src: string; langugage: string; label: string};
-      thumbnailUrl?: string;
-      index: number;
-    }>
-  >([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [mediaList, setMediaList] = useState<MediaList>([]);
   const [mediaIndex, setMediaIndex] = useState(0);
+  const [syncEngine, setSyncEngine] = useState<SyncEngine>();
 
   useEffect(() => {
-    const engine = new SyncEngine(roomId);
+    const engine = new SyncEngine('roomid', videoRef);
     setSyncEngine(engine);
-    engine.events.on('mediaListUpdate', mediaList => {
-      console.log(mediaList);
+    engine.on('updateMediaList', (mediaList, mediaIndex) => {
       setMediaList(mediaList);
+      setMediaIndex(mediaIndex);
     });
-    engine.events.on('mediaIndexUpdate', index => {
-      setMediaIndex(index);
-    });
-    return () => engine.destroy();
-  }, [setSyncEngine]);
+    return () => {
+      engine.destroy();
+    };
+  }, []);
 
   return (
     <>
-      {mediaList.length > 0 && (
-        <VideoPlayer
-          key={mediaIndex}
-          video={mediaList[mediaIndex].video}
-          subtitles={mediaList[mediaIndex].subtitles}
-          thumbnailUrl={mediaList[mediaIndex].thumbnailUrl}
-          syncEngine={syncEngine}
-        />
-      )}
+      <video
+        style={{width: '100%'}}
+        ref={videoRef}
+        controls
+        src={VIDEO_URL}
+        muted={true}
+        autoPlay={true}
+      />
       <div className="media-list">
         {mediaList.map(({name, index}) => (
           <Button
@@ -52,6 +40,7 @@ export default function SyncedPlayer() {
             className="media-list-element"
             fullWidth={true}
             onClick={() => {
+              setMediaIndex(index);
               syncEngine?.setMediaIndex(index);
             }}
             disabled={index === mediaIndex}
