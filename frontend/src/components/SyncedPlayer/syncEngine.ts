@@ -261,7 +261,7 @@ export default class SyncEngine extends EventEmitter {
 
     // If video is currently buffering and out of sync, send buffering message
     if (currentState.buffering) {
-      if (syncDelta < -1) {
+      if (syncDelta < -0.5) {
         this._startBuffering();
       }
       return;
