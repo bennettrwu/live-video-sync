@@ -182,9 +182,18 @@ export default class SyncEngine extends EventEmitter {
     );
   }
 
+  private _resetRoomBufferStatus() {
+    console.log('syncEngine._resetRoomBufferStatus()');
+
+    for (const uuid in this._roomBufferStatus) {
+      this._roomBufferStatus[uuid] = false;
+    }
+  }
+
   private _silentSetMediaIndex(index: number) {
     console.log(`syncEngine._silentSetMediaIndex(${index})`);
     // TODO: Bounds checking
+    this._resetRoomBufferStatus();
     this._videoInterface.setVideoSource(this._mediaList[index].video);
     this.emit('updateMediaList', this._mediaList, index);
   }
@@ -227,6 +236,7 @@ export default class SyncEngine extends EventEmitter {
 
     const currentState = this._videoInterface.getCurrentState();
     if (!currentState) return;
+    console.log(this._roomBufferStatus);
 
     const targetTime = this._targetState.paused
       ? this._targetState.currentTime
@@ -239,7 +249,6 @@ export default class SyncEngine extends EventEmitter {
     for (const uuid in this._roomBufferStatus) {
       if (this._roomBufferStatus[uuid]) {
         waiting = true;
-
         break;
       }
     }
