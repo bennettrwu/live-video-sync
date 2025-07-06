@@ -257,7 +257,7 @@ export default class SyncEngine extends EventEmitter {
       }
     }
 
-    if (currentState.buffering || waiting) {
+    if (this._wsSentStartBuffer || this._sentStartWaiting) {
       this._targetState.updateTime = Date.now();
     }
 
