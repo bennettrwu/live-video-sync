@@ -33,14 +33,10 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   setVideoSource(video_url: string) {
-    console.log('SliencedVideoPlayerInterface.setVideoSource()');
-
     this._hls.loadSource(video_url);
   }
 
   getCurrentState() {
-    console.log('SliencedVideoPlayerInterface.getCurrentState()');
-
     if (this._video) {
       return {
         paused: this._video.paused,
@@ -51,8 +47,6 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   silentPlay() {
-    console.log('SliencedVideoPlayerInterface.silentPlay()');
-
     if (this._video?.paused) {
       this._playIgnoreCount++;
     }
@@ -60,7 +54,6 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   silentPause() {
-    console.log('SliencedVideoPlayerInterface.silentPause()');
     if (!this._video?.paused) {
       this._pauseIgnoreCount++;
     }
@@ -68,8 +61,6 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   silentSeek(seconds: number) {
-    console.log('SliencedVideoPlayerInterface.silentSeek()');
-
     if (this._video) {
       this._seekingIgnoreCount++;
       this._video.currentTime = seconds;
@@ -77,15 +68,12 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   destroy() {
-    console.log('SliencedVideoPlayerInterface.destroy()');
-
     this._removeListeners();
     this._hls.detachMedia();
     this.removeAllListeners();
   }
 
   private _playEventListener() {
-    console.log('SliencedVideoPlayerInterface._playEventListener()');
     if (this._playIgnoreCount > 0) {
       this._playIgnoreCount--;
       return;
@@ -94,8 +82,6 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   private _pauseEventListener() {
-    console.log('SliencedVideoPlayerInterface._pauseEventListener()');
-
     if (this._pauseIgnoreCount > 0) {
       this._pauseIgnoreCount--;
       return;
@@ -104,8 +90,6 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   private _seekingEventListener() {
-    console.log('SliencedVideoPlayerInterface._seekingEventListener()');
-
     if (this._seekingIgnoreCount > 0) {
       this._seekingIgnoreCount--;
       return;
@@ -114,20 +98,20 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   private _waitingEventListner() {
-    console.log('SliencedVideoPlayerInterface._waitingEventListner()');
-
-    this._buffering = true;
+    if (!this._buffering) {
+      this._buffering = true;
+      this.emit('startBuffering');
+    }
   }
 
   private _canplayEventListner() {
-    console.log('SliencedVideoPlayerInterface._canplayEventListner()');
-
-    this._buffering = false;
+    if (this._buffering) {
+      this._buffering = false;
+      this.emit('stopBuffering');
+    }
   }
 
   private _attachListeners() {
-    console.log('SliencedVideoPlayerInterface._attachListeners()');
-
     this._video?.addEventListener('play', this._playEventListener);
     this._video?.addEventListener('pause', this._pauseEventListener);
     this._video?.addEventListener('seeking', this._seekingEventListener);
@@ -137,8 +121,6 @@ export default class SilencedVideoPlayerInterface extends EventEmitter {
   }
 
   private _removeListeners() {
-    console.log('SliencedVideoPlayerInterface._removeListeners()');
-
     this._video?.removeEventListener('play', this._playEventListener);
     this._video?.removeEventListener('pause', this._pauseEventListener);
     this._video?.removeEventListener('seeking', this._seekingEventListener);

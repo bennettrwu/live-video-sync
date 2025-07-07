@@ -1,12 +1,19 @@
 import {FastifyInstance} from 'fastify';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
+import SyncedState from './shared/syncedState';
+import type SyncedClockInterface from './shared/syncedClockInterface';
+const {performance} = require('perf_hooks');
 
 type RoomEvents = {
-  [key: string]: (
-    syncState: {[key: string]: string} & {uuid: string}
-  ) => unknown;
+  [key: string]: () => unknown;
 };
+
+class Clock implements SyncedClockInterface {
+  now() {
+    return performance.now();
+  }
+}
 
 /**
  * roomSyncAPIv1()
@@ -17,27 +24,28 @@ type RoomEvents = {
 export default function roomSyncAPIv1(fastify: FastifyInstance) {
   const room_events = new EventEmitter() as TypedEmitter<RoomEvents>;
   const room_states: {
-    [key: string]: {
-      paused: boolean;
-      mediaIndex: number;
-      currentTime: number;
-      updateTime: number;
-    };
+    [key: string]: SyncedState;
   } = {};
+  const clock = new Clock();
 
   fastify.get('/roomSyncAPI/v1/:roomId/mediaList', (req, reply) => {
     reply.send([
       {
-        name: 'Test 0',
-        video: '/test0/master.m3u8',
+        name: 'Bocchi 1',
+        video: '/bocchi1/master.m3u8',
         index: 0,
       },
       {
-        name: 'Test 1',
-        video: '/test1/master.m3u8',
+        name: 'Bocchi 2',
+        video: '/bocchi2/master.m3u8',
         index: 1,
       },
     ]);
+  });
+
+  fastify.get('/roomSyncAPI/v1/clockSync', () => {
+    const timestamp = clock.now();
+    return {timestamp};
   });
 
   fastify.get(
@@ -59,74 +67,66 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
     },
     (ws, req) => {
       const roomId = (req.params as {roomId: string}).roomId;
-      const uuid = req.id;
+      let isBuffering = false;
+
+      // Create room
       if (!(roomId in room_states)) {
-        room_states[roomId] = {
-          paused: true,
-          mediaIndex: 0,
-          currentTime: 0,
-          updateTime: Date.now(),
-        };
+        room_states[roomId] = new SyncedState(clock);
       }
 
-      function sendSyncState(state: {uuid: string}) {
-        if (state.uuid === uuid) return;
-        ws.send(JSON.stringify(state));
+      function sendUpdate() {
+        ws.send(
+          JSON.stringify({
+            type: 'targetStateUpdate',
+            ...room_states[roomId].getState(),
+          })
+        );
       }
-      room_events.on(roomId, sendSyncState);
+      room_events.on(roomId, sendUpdate);
+      sendUpdate();
 
-      const targetState = room_states[roomId];
-      const targetTime = targetState.paused
-        ? targetState.currentTime
-        : (Date.now() - targetState.updateTime) / 1000 +
-          targetState.currentTime;
-      ws.send(
-        JSON.stringify({
-          type: 'targetStateUpdate',
-          paused: targetState.paused,
-          mediaIndex: targetState.mediaIndex,
-          currentTime: targetTime,
-        })
-      );
-
-      ws.on('close', code => {
-        req.log.info({msg: 'Websocket closed', code});
-        room_events.removeListener(roomId, sendSyncState);
-        room_events.emit(roomId, {type: 'leave', uuid});
-      });
-
-      ws.on('error', err => {
-        req.log.error({err});
+      // Remove client from collection on close
+      ws.on('close', () => {
+        room_events.removeListener(roomId, sendUpdate);
+        if (isBuffering) {
+          room_states[roomId].subBuffering();
+          room_events.emit(roomId);
+        }
       });
 
       ws.on('message', (data, isBinary) => {
         if (isBinary) {
-          // TODO: Error handling
+          // TODO: error handling
           return;
         }
-
         const message = JSON.parse(data.toString());
-        console.log(message);
 
         if (message.type === 'heartbeat') {
-          ws.send(JSON.stringify({type: 'heartbeat', uuid}));
+          ws.send(JSON.stringify({type: 'heartbeat'}));
+        } else if (message.type === 'play') {
+          room_states[roomId].play();
+          room_events.emit(roomId);
+        } else if (message.type === 'pause') {
+          room_states[roomId].pause();
+          room_events.emit(roomId);
+        } else if (message.type === 'seek') {
+          room_states[roomId].seek(message.videoTime);
+          room_events.emit(roomId);
         } else if (message.type === 'startBuffering') {
-          room_events.emit(roomId, {type: 'startBuffering', uuid});
+          if (!isBuffering) {
+            isBuffering = true;
+            room_states[roomId].addBuffering();
+            room_events.emit(roomId);
+          }
         } else if (message.type === 'stopBuffering') {
-          room_events.emit(roomId, {type: 'stopBuffering', uuid});
-        } else if (message.type === 'targetStateUpdate') {
-          room_states[roomId].paused = message.paused;
-          room_states[roomId].mediaIndex = message.mediaIndex;
-          room_states[roomId].currentTime = message.currentTime;
-          room_states[roomId].updateTime = Date.now();
-
-          room_events.emit(roomId, {
-            type: 'targetStateUpdate',
-            paused: message.paused,
-            mediaIndex: message.mediaIndex,
-            currentTime: message.currentTime,
-            uuid,
-          });
+          if (isBuffering) {
+            isBuffering = false;
+            room_states[roomId].subBuffering();
+            room_events.emit(roomId);
+          }
+        } else if (message.type === 'setMediaIndex') {
+          room_states[roomId].setMediaIndex(message.mediaIndex);
+          room_events.emit(roomId);
         }
       });
     }
