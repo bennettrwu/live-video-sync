@@ -26,7 +26,6 @@ export default class SyncEngine extends EventEmitter {
     videoRef: React.RefObject<HTMLVideoElement>
   ) {
     super();
-    console.log('SyncEngine.constructor()');
 
     this._syncLoopIteration = this._syncLoopIteration.bind(this);
 
@@ -39,23 +38,18 @@ export default class SyncEngine extends EventEmitter {
     // Init video interface
     this._videoInterface = new SilencedVideoPlayerInterface(videoRef);
     this._videoInterface.on('play', () => {
-      console.log('play');
       this._stateSyncEngine?.play();
     });
     this._videoInterface.on('pause', () => {
-      console.log('pause');
       this._stateSyncEngine?.pause();
     });
     this._videoInterface.on('seek', state => {
-      console.log('seek');
       this._stateSyncEngine?.seek(state.currentTime);
     });
     this._videoInterface.on('startBuffering', () => {
-      console.log('startBuffering');
       this._stateSyncEngine?.startBuffering();
     });
     this._videoInterface.on('stopBuffering', () => {
-      console.log('stopBuffering');
       this._stateSyncEngine?.stopBuffering();
     });
 
@@ -64,7 +58,6 @@ export default class SyncEngine extends EventEmitter {
   }
 
   setMediaIndex(index: number) {
-    console.log(`syncEngine.setMediaIndex(${index})`);
     // TODO: Bounds checking
     this._stateSyncEngine?.setMediaIndex(index);
     this._silentSetMediaIndex(index);
@@ -93,8 +86,8 @@ export default class SyncEngine extends EventEmitter {
       .then(json => {
         // Todo: Type check for this
         this._mediaList = json;
-        this._silentSetMediaIndex(0);
-        this.emit('updateMediaList', this._mediaList, 0);
+        this._silentSetMediaIndex(this._mediaIndex);
+        this.emit('updateMediaList', this._mediaList, this._mediaIndex);
       });
   }
 
