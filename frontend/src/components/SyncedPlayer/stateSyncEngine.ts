@@ -35,7 +35,7 @@ export default class StateSyncEngine {
     if (!state) return;
 
     const waiting = this._isBuffering ? false : state.bufferingCount > 0;
-    const paused = waiting || this._isBuffering || state.paused;
+    const paused = waiting || state.paused;
     const videoTime = state.videoTime;
     return {waiting, paused, videoTime, mediaIndex: state.mediaIndex};
   }
