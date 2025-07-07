@@ -28,7 +28,7 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
   } = {};
   const room_clients: {
     [key: string]: number;
-  };
+  } = {};
   const clock = new Clock();
 
   fastify.get('/roomSyncAPI/v1/:roomId/mediaList', (req, reply) => {
