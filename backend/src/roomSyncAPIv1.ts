@@ -71,8 +71,11 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
 
       // Create room
       if (!(roomId in room_states)) {
+        req.log.info({msg: "Room Id doesn't exist, creating new room"});
         room_states[roomId] = new SyncedState(clock);
       }
+
+      req.log.info({msg: 'Sync websocket opened'});
 
       function sendUpdate() {
         ws.send(
@@ -86,7 +89,9 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
       sendUpdate();
 
       // Remove client from collection on close
-      ws.on('close', () => {
+      ws.on('close', code => {
+        req.log.info({msg: 'Sync websocket closed', code});
+
         room_events.removeListener(roomId, sendUpdate);
         if (isBuffering) {
           room_states[roomId].subBuffering();
@@ -100,6 +105,8 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
           return;
         }
         const message = JSON.parse(data.toString());
+
+        req.log.info({msg: 'Received sync message', message});
 
         if (message.type === 'heartbeat') {
           ws.send(JSON.stringify({type: 'heartbeat'}));
