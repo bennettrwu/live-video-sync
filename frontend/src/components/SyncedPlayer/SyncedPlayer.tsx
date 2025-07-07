@@ -1,10 +1,8 @@
 import {Button} from '@mantine/core';
 import {useEffect, useRef, useState} from 'react';
-import SyncEngine, {type MediaList} from './syncEngine';
+import SyncEngine, {type MediaList} from './syncEngine/syncEngine';
 
 import './SyncedPlayer.scss';
-
-const VIDEO_URL = './frieren28/video.m3u8';
 
 export default function SyncedPlayer() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -16,6 +14,7 @@ export default function SyncedPlayer() {
   useEffect(() => {
     const engine = new SyncEngine('roomid', videoRef);
     setSyncEngine(engine);
+
     engine.on('updateMediaList', (mediaList, mediaIndex) => {
       setMediaList(mediaList);
       setMediaIndex(mediaIndex);
@@ -27,18 +26,13 @@ export default function SyncedPlayer() {
     engine.on('stopWaiting', () => {
       setWaiting(false);
     });
-    return () => {
-      engine.destroy();
-    };
+
+    return () => engine.destroy();
   }, []);
 
   return (
     <>
-      <div
-        style={{
-          position: 'relative',
-        }}
-      >
+      <div style={{position: 'relative'}}>
         <div
           style={{
             display: waiting ? 'block' : 'none',
@@ -57,12 +51,12 @@ export default function SyncedPlayer() {
           style={{width: '100%'}}
           ref={videoRef}
           controls
-          src={VIDEO_URL}
           muted={true}
-          autoPlay={true}
+          autoPlay={false}
           controlsList="noplaybackrate"
         />
       </div>
+
       <div className="media-list">
         {mediaList.map(({name, index}) => (
           <Button

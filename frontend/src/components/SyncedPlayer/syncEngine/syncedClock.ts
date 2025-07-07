@@ -4,6 +4,11 @@ import type SyncedClockInterface from './shared/syncedClockInterface';
 const CLOCK_SYNC_API = '/roomSyncAPI/v1/clockSync';
 const CLOCK_SYNC_INTERVAL = 10000;
 
+/**
+ * SyncedClockClient
+ *
+ * Provides a syncronized timestamp (with no relation to real time) that is syncronized with the server's timestamp
+ */
 export default class SyncedClockClient
   extends EventEmitter
   implements SyncedClockInterface

@@ -3,7 +3,14 @@ import SyncedClockClient from './syncedClock';
 
 const WS_HEARTBEAT_INTERVAL = 1000;
 
-export default class StateSyncEngine {
+/**
+ * StateSynchronizer
+ *
+ * Provides an interface to mantain a syncronized state with server
+ * Local client events are immediately applied to local state and broadcast to server
+ * Local state is eventually consistent with server state
+ */
+export default class StateSynchronizer {
   private _ws: WebSocket | undefined;
   private _wsReconnectTimeout: NodeJS.Timeout | undefined;
   private _wsHeartbeatLoop: NodeJS.Timeout;

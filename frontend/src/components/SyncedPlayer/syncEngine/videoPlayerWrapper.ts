@@ -1,8 +1,14 @@
 import Hls from 'hls.js';
 import EventEmitter from 'events';
 
-// TODO: Bunch of error handling
-export default class SilencedVideoPlayerInterface extends EventEmitter {
+/**
+ * VideoPlayerWrapper
+ *
+ * Enables modifying video player silently (without triggering events)
+ * Allows for the differentiation between user iteraction (triggers events) and SyncEngine actions (no events)
+ * // TODO: Bunch of error handling
+ */
+export default class VideoPlayerWrapper extends EventEmitter {
   private _video: HTMLVideoElement | null = null;
   private _buffering = false;
   private _hls: Hls;

@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
-import SilencedVideoPlayerInterface from './silencedVideoPlayerInterface';
-import StateSyncEngine from './stateSyncEngine';
+import StateSyncronizer from './stateSynchronizer';
+import VideoPlayerWrapper from './videoPlayerWrapper';
 
 export type MediaList = Array<{
   name: string;
@@ -9,12 +9,17 @@ export type MediaList = Array<{
 }>;
 const VIDEO_SYNC_INTERVAL = 100;
 
-// TODO: Bunch of Error handling
+/**
+ * SyncEngine
+ *
+ * Handles mantaining state synchronization between StateSynchronizer and video
+ * // TODO: Bunch of Error handling
+ */
 export default class SyncEngine extends EventEmitter {
   private _mediaList: MediaList = [];
 
-  private _stateSyncEngine: StateSyncEngine | undefined;
-  private _videoInterface: SilencedVideoPlayerInterface;
+  private _stateSync: StateSyncronizer | undefined;
+  private _videoWrapper: VideoPlayerWrapper;
 
   private _syncLoop: NodeJS.Timeout;
 
@@ -32,25 +37,25 @@ export default class SyncEngine extends EventEmitter {
     this._fetchMediaList();
 
     this.once('updateMediaList', () => {
-      this._stateSyncEngine = new StateSyncEngine(this._roomId);
+      this._stateSync = new StateSyncronizer(this._roomId);
     });
 
     // Init video interface
-    this._videoInterface = new SilencedVideoPlayerInterface(videoRef);
-    this._videoInterface.on('play', () => {
-      this._stateSyncEngine?.play();
+    this._videoWrapper = new VideoPlayerWrapper(videoRef);
+    this._videoWrapper.on('play', () => {
+      this._stateSync?.play();
     });
-    this._videoInterface.on('pause', () => {
-      this._stateSyncEngine?.pause();
+    this._videoWrapper.on('pause', () => {
+      this._stateSync?.pause();
     });
-    this._videoInterface.on('seek', state => {
-      this._stateSyncEngine?.seek(state.currentTime);
+    this._videoWrapper.on('seek', state => {
+      this._stateSync?.seek(state.currentTime);
     });
-    this._videoInterface.on('startBuffering', () => {
-      this._stateSyncEngine?.startBuffering();
+    this._videoWrapper.on('startBuffering', () => {
+      this._stateSync?.startBuffering();
     });
-    this._videoInterface.on('stopBuffering', () => {
-      this._stateSyncEngine?.stopBuffering();
+    this._videoWrapper.on('stopBuffering', () => {
+      this._stateSync?.stopBuffering();
     });
 
     // Init sync loop
@@ -59,21 +64,19 @@ export default class SyncEngine extends EventEmitter {
 
   setMediaIndex(index: number) {
     // TODO: Bounds checking
-    this._stateSyncEngine?.setMediaIndex(index);
+    this._stateSync?.setMediaIndex(index);
     this._silentSetMediaIndex(index);
   }
 
   private _silentSetMediaIndex(index: number) {
     this._mediaIndex = index;
-    this._videoInterface.setVideoSource(
-      this._mediaList[this._mediaIndex].video
-    );
+    this._videoWrapper.setVideoSource(this._mediaList[this._mediaIndex].video);
     this.emit('updateMediaList', this._mediaList, this._mediaIndex);
   }
 
   destroy() {
-    this._stateSyncEngine?.destroy();
-    this._videoInterface.destroy();
+    this._stateSync?.destroy();
+    this._videoWrapper.destroy();
 
     clearTimeout(this._syncLoop);
 
@@ -106,10 +109,10 @@ export default class SyncEngine extends EventEmitter {
   private _syncLoopIteration() {
     this._syncLoop = setTimeout(this._syncLoopIteration, VIDEO_SYNC_INTERVAL);
 
-    const currentState = this._videoInterface.getCurrentState();
+    const currentState = this._videoWrapper.getCurrentState();
     if (!currentState) return;
 
-    const targetState = this._stateSyncEngine?.getTargetState();
+    const targetState = this._stateSync?.getTargetState();
     if (!targetState) return;
 
     if (targetState.mediaIndex !== this._mediaIndex) {
@@ -124,14 +127,14 @@ export default class SyncEngine extends EventEmitter {
 
     if (targetState.paused !== currentState.paused) {
       if (targetState.paused) {
-        this._videoInterface.silentPause();
+        this._videoWrapper.silentPause();
       } else {
-        this._videoInterface.silentPlay();
+        this._videoWrapper.silentPlay();
       }
     }
 
     if (Math.abs(currentState.currentTime - targetState.videoTime) > 0.5) {
-      this._videoInterface.silentSeek(targetState.videoTime);
+      this._videoWrapper.silentSeek(targetState.videoTime);
     }
   }
 }
