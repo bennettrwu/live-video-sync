@@ -26,6 +26,9 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
   const room_states: {
     [key: string]: SyncedState;
   } = {};
+  const room_clients: {
+    [key: string]: number;
+  };
   const clock = new Clock();
 
   fastify.get('/roomSyncAPI/v1/:roomId/mediaList', (req, reply) => {
@@ -73,9 +76,11 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
       if (!(roomId in room_states)) {
         req.log.info({msg: "Room Id doesn't exist, creating new room"});
         room_states[roomId] = new SyncedState(clock);
+        room_clients[roomId] = 0;
       }
 
       req.log.info({msg: 'Sync websocket opened'});
+      room_clients[roomId]++;
 
       function sendUpdate() {
         ws.send(
@@ -91,6 +96,10 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
       // Remove client from collection on close
       ws.on('close', code => {
         req.log.info({msg: 'Sync websocket closed', code});
+        room_clients[roomId]--;
+        if (room_clients[roomId] === 0) {
+          room_states[roomId].pause();
+        }
 
         room_events.removeListener(roomId, sendUpdate);
         if (isBuffering) {
