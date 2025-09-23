@@ -1,8 +1,9 @@
 import EventEmitter from 'events';
 import type SyncedClockInterface from './shared/syncedClockInterface';
 
+const CLOCK_DRIFT_HISTORY_LEN = 5;
 const CLOCK_SYNC_API = '/roomSyncAPI/v1/clockSync';
-const CLOCK_SYNC_INTERVAL = 10000;
+const CLOCK_SYNC_INTERVAL = 1000;
 
 /**
  * SyncedClockClient
@@ -13,6 +14,7 @@ export default class SyncedClockClient
   extends EventEmitter
   implements SyncedClockInterface
 {
+  private _clockDriftHistory: number[] = [];
   private _timeOffset = 0;
   private _timeSyncLoop: NodeJS.Timeout | undefined;
 
@@ -24,28 +26,37 @@ export default class SyncedClockClient
   }
 
   private _syncTime() {
-    const startTime = performance.now();
+    const startTime = Date.now();
     let endTime: number;
 
     fetch(CLOCK_SYNC_API)
       .then(response => {
-        endTime = performance.now();
+        endTime = Date.now();
         return response;
       })
       .then(response => response.json())
       .then(({timestamp}) => {
         const latency = (endTime - startTime) / 2;
-        this._timeOffset = timestamp + latency - endTime;
+        const drift = timestamp + latency - endTime;
+        this._clockDriftHistory.push(drift);
+
+        if (this._clockDriftHistory.length > CLOCK_DRIFT_HISTORY_LEN) {
+          this._clockDriftHistory.shift();
+        }
+
+        this._timeOffset =
+          this._clockDriftHistory.reduce((a, b) => a + b) /
+          this._clockDriftHistory.length;
 
         console.log(
-          `Synced time with server. Latency: ${latency}, offest: ${this._timeOffset}, current timestamp: ${this.now()}`
+          `Synced time with server. Sync Latency: ${latency.toFixed(2)}\tLastest Drift: ${drift.toFixed(2)}\tOffest: ${this._timeOffset.toFixed(2)}\tCurrent Timestamp: ${this.now()}`
         );
         this.emit('synced');
       });
   }
 
   now() {
-    return performance.now() + this._timeOffset;
+    return Date.now() + this._timeOffset;
   }
 
   destroy() {

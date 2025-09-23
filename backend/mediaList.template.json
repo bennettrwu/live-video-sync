@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Bocchi 1",
+    "video": "/bocchi1/master.m3u8",
+    "index": 0
+  },
+  {
+    "name": "Bocchi 2",
+    "video": "/bocchi2/master.m3u8",
+    "index": 1
+  }
+]

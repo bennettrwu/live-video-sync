@@ -1,9 +1,11 @@
+import fs from 'fs';
 import {FastifyInstance} from 'fastify';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import SyncedState from './shared/syncedState';
 import type SyncedClockInterface from './shared/syncedClockInterface';
-const {performance} = require('perf_hooks');
+
+const mediaList = JSON.parse(fs.readFileSync('./mediaList.json', 'utf8'));
 
 type RoomEvents = {
   [key: string]: () => unknown;
@@ -11,7 +13,7 @@ type RoomEvents = {
 
 class Clock implements SyncedClockInterface {
   now() {
-    return performance.now();
+    return Date.now();
   }
 }
 
@@ -32,18 +34,7 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
   const clock = new Clock();
 
   fastify.get('/roomSyncAPI/v1/:roomId/mediaList', (req, reply) => {
-    reply.send([
-      {
-        name: 'Bocchi 1',
-        video: '/bocchi1/master.m3u8',
-        index: 0,
-      },
-      {
-        name: 'Bocchi 2',
-        video: '/bocchi2/master.m3u8',
-        index: 1,
-      },
-    ]);
+    reply.send(mediaList);
   });
 
   fastify.get('/roomSyncAPI/v1/clockSync', () => {
