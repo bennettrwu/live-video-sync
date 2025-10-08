@@ -106,10 +106,10 @@ export default class SyncEngine extends EventEmitter {
     this.emit('stopWaiting');
   }
 
-  private _syncLoopIteration() {
+  private async _syncLoopIteration() {
     this._syncLoop = setTimeout(this._syncLoopIteration, VIDEO_SYNC_INTERVAL);
 
-    const currentState = this._videoWrapper.getCurrentState();
+    const currentState = await this._videoWrapper.getCurrentState();
     if (!currentState) return;
 
     const targetState = this._stateSync?.getTargetState();
