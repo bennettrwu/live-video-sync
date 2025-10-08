@@ -44,7 +44,7 @@ export default class VideoPlayerWrapper extends EventEmitter {
 
   async getCurrentState() {
     if (this._video) {
-      await new Promise(r => setImmediate(r));
+      await new Promise(r => setTimeout(r, 0));
       return {
         paused: this._video.paused,
         currentTime: this._video.currentTime,
