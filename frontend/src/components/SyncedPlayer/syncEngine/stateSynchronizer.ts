@@ -49,28 +49,28 @@ export default class StateSynchronizer {
 
   play() {
     console.log('Client play event');
-    this._syncState?.play();
-    this._ws?.send(JSON.stringify({type: 'play'}));
+    const updateTime = this._syncState?.play();
+    this._ws?.send(JSON.stringify({type: 'play', updateTime}));
   }
 
   pause() {
     console.log('Client pause event');
-    this._syncState?.pause();
-    this._ws?.send(JSON.stringify({type: 'pause'}));
+    const updateTime = this._syncState?.pause();
+    this._ws?.send(JSON.stringify({type: 'pause', updateTime}));
   }
 
   seek(videoTime: number) {
     console.log('Client seek event, videoTime:', videoTime);
-    this._syncState?.seek(videoTime);
-    this._ws?.send(JSON.stringify({type: 'seek', videoTime}));
+    const updateTime = this._syncState?.seek(videoTime);
+    this._ws?.send(JSON.stringify({type: 'seek', videoTime, updateTime}));
   }
 
   startBuffering() {
     if (!this._isBuffering) {
       console.log('Client startBuffering event');
       this._isBuffering = true;
-      this._syncState?.addBuffering();
-      this._ws?.send(JSON.stringify({type: 'startBuffering'}));
+      const updateTime = this._syncState?.addBuffering();
+      this._ws?.send(JSON.stringify({type: 'startBuffering', updateTime}));
     }
   }
 
@@ -78,15 +78,17 @@ export default class StateSynchronizer {
     if (this._isBuffering) {
       console.log('Client stopBuffering event');
       this._isBuffering = false;
-      this._syncState?.subBuffering();
-      this._ws?.send(JSON.stringify({type: 'stopBuffering'}));
+      const updateTime = this._syncState?.subBuffering();
+      this._ws?.send(JSON.stringify({type: 'stopBuffering', updateTime}));
     }
   }
 
   setMediaIndex(index: number) {
     console.log('Client setMediaIndex event, index:', index);
-    this._syncState?.setMediaIndex(index);
-    this._ws?.send(JSON.stringify({type: 'setMediaIndex', mediaIndex: index}));
+    const updateTime = this._syncState?.setMediaIndex(index);
+    this._ws?.send(
+      JSON.stringify({type: 'setMediaIndex', mediaIndex: index, updateTime})
+    );
   }
 
   destroy() {

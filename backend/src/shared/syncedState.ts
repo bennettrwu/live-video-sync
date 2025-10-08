@@ -57,41 +57,46 @@ export default class SyncedState {
    * Updates the target state snapshot to the current timestamp
    * Should be called BEFORE every state change
    */
-  private _updateVideoTime() {
-    const timestamp = this._clock.now();
+  private _updateVideoTime(timestamp = this._clock.now()) {
     this._state.videoTime = this._videoTimeAt(timestamp);
     this._state.updateTime = timestamp;
   }
 
-  play() {
-    this._updateVideoTime();
+  play(timestamp?: number) {
+    this._updateVideoTime(timestamp);
     this._state.paused = false;
+    return this._state.updateTime;
   }
 
-  pause() {
-    this._updateVideoTime();
+  pause(timestamp?: number) {
+    this._updateVideoTime(timestamp);
     this._state.paused = true;
+    return this._state.updateTime;
   }
 
-  seek(videoTime: number) {
-    this._updateVideoTime();
+  seek(videoTime: number, timestamp?: number) {
+    this._updateVideoTime(timestamp);
     this._state.videoTime = videoTime;
+    return this._state.updateTime;
   }
 
-  addBuffering() {
-    this._updateVideoTime();
+  addBuffering(timestamp?: number) {
+    this._updateVideoTime(timestamp);
     this._state.bufferingCount++;
+    return this._state.updateTime;
   }
 
-  subBuffering() {
-    this._updateVideoTime();
+  subBuffering(timestamp?: number) {
+    this._updateVideoTime(timestamp);
     this._state.bufferingCount--;
+    return this._state.updateTime;
   }
 
-  setMediaIndex(index: number) {
-    this._updateVideoTime();
+  setMediaIndex(index: number, timestamp?: number) {
+    this._updateVideoTime(timestamp);
     this._state.videoTime = 0;
     this._state.mediaIndex = index;
+    return this._state.updateTime;
   }
 
   getState() {

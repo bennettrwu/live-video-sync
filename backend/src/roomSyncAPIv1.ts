@@ -109,30 +109,35 @@ export default function roomSyncAPIv1(fastify: FastifyInstance) {
         req.log.info({msg: 'Received sync message', message});
 
         if (message.type === 'heartbeat') {
-          ws.send(JSON.stringify({type: 'heartbeat'}));
+          ws.send(
+            JSON.stringify({type: 'heartbeat', updateTime: message.updateTime})
+          );
         } else if (message.type === 'play') {
-          room_states[roomId].play();
+          room_states[roomId].play(message.updateTime);
           room_events.emit(roomId);
         } else if (message.type === 'pause') {
-          room_states[roomId].pause();
+          room_states[roomId].pause(message.updateTime);
           room_events.emit(roomId);
         } else if (message.type === 'seek') {
-          room_states[roomId].seek(message.videoTime);
+          room_states[roomId].seek(message.videoTime, message.updateTime);
           room_events.emit(roomId);
         } else if (message.type === 'startBuffering') {
           if (!isBuffering) {
             isBuffering = true;
-            room_states[roomId].addBuffering();
+            room_states[roomId].addBuffering(message.updateTime);
             room_events.emit(roomId);
           }
         } else if (message.type === 'stopBuffering') {
           if (isBuffering) {
             isBuffering = false;
-            room_states[roomId].subBuffering();
+            room_states[roomId].subBuffering(message.updateTime);
             room_events.emit(roomId);
           }
         } else if (message.type === 'setMediaIndex') {
-          room_states[roomId].setMediaIndex(message.mediaIndex);
+          room_states[roomId].setMediaIndex(
+            message.mediaIndex,
+            message.updateTime
+          );
           room_events.emit(roomId);
         }
       });
