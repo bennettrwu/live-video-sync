@@ -120,7 +120,7 @@ export default class VideoPlayerWrapper extends EventEmitter {
   private _attachListeners() {
     this._video?.addEventListener('play', this._playEventListener);
     this._video?.addEventListener('pause', this._pauseEventListener);
-    this._video?.addEventListener('seeking', this._seekingEventListener);
+    this._video?.addEventListener('seeked', this._seekingEventListener);
 
     this._video?.addEventListener('waiting', this._waitingEventListner);
     this._video?.addEventListener('canplay', this._canplayEventListner);
@@ -129,7 +129,7 @@ export default class VideoPlayerWrapper extends EventEmitter {
   private _removeListeners() {
     this._video?.removeEventListener('play', this._playEventListener);
     this._video?.removeEventListener('pause', this._pauseEventListener);
-    this._video?.removeEventListener('seeking', this._seekingEventListener);
+    this._video?.removeEventListener('seeked', this._seekingEventListener);
 
     this._video?.removeEventListener('waiting', this._waitingEventListner);
     this._video?.removeEventListener('canplay', this._canplayEventListner);
