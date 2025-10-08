@@ -119,6 +119,7 @@ export default class SyncedState {
       updateTime: number;
     }>
   ) {
+    if (this._state.updateTime > state.updateTime) return;
     this._state = Object.assign(this._state, state);
   }
 }
