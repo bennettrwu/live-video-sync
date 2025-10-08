@@ -15,6 +15,7 @@ export default class VideoPlayerWrapper extends EventEmitter {
   private _playIgnoreCount = 0;
   private _pauseIgnoreCount = 0;
   private _seekingIgnoreCount = 0;
+  private _started = false;
 
   constructor(videoRef: React.RefObject<HTMLVideoElement>) {
     super();
@@ -53,21 +54,21 @@ export default class VideoPlayerWrapper extends EventEmitter {
   }
 
   silentPlay() {
-    if (this._video?.paused) {
+    if (this._video?.paused && this._started) {
       this._playIgnoreCount++;
     }
     this._video?.play();
   }
 
   silentPause() {
-    if (!this._video?.paused) {
+    if (!this._video?.paused && this._started) {
       this._pauseIgnoreCount++;
     }
     this._video?.pause();
   }
 
   silentSeek(seconds: number) {
-    if (this._video) {
+    if (this._video && this._started) {
       this._seekingIgnoreCount++;
       this._video.currentTime = seconds;
     }
@@ -80,6 +81,7 @@ export default class VideoPlayerWrapper extends EventEmitter {
   }
 
   private async _playEventListener() {
+    this._started = true;
     if (this._playIgnoreCount > 0) {
       this._playIgnoreCount--;
       return;
