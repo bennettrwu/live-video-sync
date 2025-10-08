@@ -42,7 +42,7 @@ export default class VideoPlayerWrapper extends EventEmitter {
     this._hls.loadSource(video_url);
   }
 
-  getCurrentState() {
+  async getCurrentState() {
     if (this._video) {
       return {
         paused: this._video.paused,
@@ -79,40 +79,42 @@ export default class VideoPlayerWrapper extends EventEmitter {
     this.removeAllListeners();
   }
 
-  private _playEventListener() {
+  private async _playEventListener() {
     if (this._playIgnoreCount > 0) {
       this._playIgnoreCount--;
       return;
     }
-    this.emit('play', this.getCurrentState());
+    this.emit('play', await this.getCurrentState());
   }
 
-  private _pauseEventListener() {
+  private async _pauseEventListener() {
     if (this._pauseIgnoreCount > 0) {
       this._pauseIgnoreCount--;
       return;
     }
-    this.emit('pause', this.getCurrentState());
+    this.emit('pause', await this.getCurrentState());
   }
 
-  private _seekingEventListener() {
+  private async _seekingEventListener() {
     if (this._seekingIgnoreCount > 0) {
       this._seekingIgnoreCount--;
       return;
     }
-    this.emit('seek', this.getCurrentState());
+    this.emit('seek', await this.getCurrentState());
   }
 
-  private _waitingEventListner() {
+  private async _waitingEventListner() {
     if (!this._buffering) {
       this._buffering = true;
+      await this.getCurrentState();
       this.emit('startBuffering');
     }
   }
 
-  private _canplayEventListner() {
+  private async _canplayEventListner() {
     if (this._buffering) {
       this._buffering = false;
+      await this.getCurrentState();
       this.emit('stopBuffering');
     }
   }
