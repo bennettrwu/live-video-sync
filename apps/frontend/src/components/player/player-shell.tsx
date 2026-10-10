@@ -87,17 +87,36 @@ export function PlayerShell({
       onTouchStart={showControls}
       tabIndex={-1}
     >
-      <VideoSurface onElement={onVideoElement} />
-      <StatusOverlay
-        view={view}
-        onGestureTap={() => {
-          onLocal({ type: 'gestureTap' });
-        }}
-      />
-      <StallBadge
-        stalledMembers={view.stalledMembers}
-        connectionId={view.connectionId}
-      />
+      <div className={classes['stage']}>
+        <VideoSurface onElement={onVideoElement} />
+        <StatusOverlay
+          view={view}
+          onGestureTap={() => {
+            onLocal({ type: 'gestureTap' });
+          }}
+        />
+        <StallBadge
+          stalledMembers={view.stalledMembers}
+          connectionId={view.connectionId}
+        />
+
+        <div
+          className={[
+            classes['controls'],
+            controlsHidden ? classes['hidden'] : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <ControlBar
+            view={view}
+            local={local}
+            showPanelToggle={local.fullscreen}
+            onShared={onShared}
+            onLocal={onLocal}
+          />
+        </div>
+      </div>
 
       {local.fullscreen && local.panelOpen && (
         <div className={classes['panel']}>
@@ -109,23 +128,6 @@ export function PlayerShell({
           />
         </div>
       )}
-
-      <div
-        className={[
-          classes['controls'],
-          controlsHidden ? classes['hidden'] : undefined,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <ControlBar
-          view={view}
-          local={local}
-          showPanelToggle={local.fullscreen}
-          onShared={onShared}
-          onLocal={onLocal}
-        />
-      </div>
     </div>
   );
 }

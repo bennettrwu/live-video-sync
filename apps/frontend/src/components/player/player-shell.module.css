@@ -1,5 +1,6 @@
 .shell {
   position: relative;
+  display: flex;
   width: 100%;
   aspect-ratio: 16 / 9;
   background: black;
@@ -17,6 +18,13 @@
   cursor: none;
 }
 
+/* The video and everything drawn over it. Shrinks when the panel is open. */
+.stage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
 .controls {
   position: absolute;
   left: 0;
@@ -32,13 +40,11 @@
   pointer-events: none;
 }
 
+/* Sits beside the stage rather than over it. */
 .panel {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(360px, 80%);
-  z-index: 3;
-  background: var(--mantine-color-body);
+  flex: none;
+  width: min(360px, 40%);
   overflow: auto;
+  background: var(--mantine-color-body);
+  cursor: auto;
 }
