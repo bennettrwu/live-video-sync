@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    // This project is noEmit, so the build info is tsc's only output. Keep it
+    // out of ./dist, which `vite build` empties.
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    "rootDir": ".",
+    "paths": {
+      "#src/*": ["./src/*"],
+      "#tests/*": ["./tests/*"]
+    },
+    "types": ["vite/client"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["src", "tests"],
+  "references": [
+    { "path": "../../packages/sync-protocol" },
+    { "path": "../../packages/sync-engine" }
+  ]
+}

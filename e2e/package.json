@@ -1,0 +1,21 @@
+{
+  "name": "@live-video-sync/e2e",
+  "version": "0.0.0",
+  "description": "Playwright end-to-end tests: real sync-server, built frontend, several browser contexts in one room",
+  "author": "bennettrwu",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fixtures": "bash ./scripts/fetch-media.sh",
+    "format": "prettier --check ./tests ./playwright.config.ts ./global-setup.ts",
+    "format:fix": "prettier --write ./tests ./playwright.config.ts ./global-setup.ts",
+    "lint": "eslint ./tests ./playwright.config.ts ./global-setup.ts",
+    "lint:fix": "eslint ./tests ./playwright.config.ts ./global-setup.ts --fix",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

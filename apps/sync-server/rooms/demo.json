@@ -1,0 +1,16 @@
+{
+  "code": "demo",
+  "name": "Demo room",
+  "media": [
+    {
+      "id": "big-buck-bunny",
+      "name": "Big Buck Bunny",
+      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+    },
+    {
+      "id": "tears-of-steel",
+      "name": "Tears of Steel",
+      "url": "https://test-streams.mux.dev/tos_ismc/main.m3u8"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  // Solution-style root: `tsc --build` from here type-checks every workspace
+  // in dependency order. Editors also pick this up for cross-package go-to-def.
+  "files": [],
+  "references": [
+    { "path": "packages/sync-protocol" },
+    { "path": "packages/fastify-platform" },
+    { "path": "packages/sync-engine" },
+    { "path": "apps/sync-server" },
+    { "path": "apps/frontend" }
+  ]
+}

@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/coverage
+**/.tsbuildinfo
+**/*.tsbuildinfo
+.git
+e2e/fixtures/media
+e2e/test-results
+e2e/playwright-report
+deploy/data

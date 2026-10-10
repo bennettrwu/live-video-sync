@@ -1,0 +1,8 @@
+{
+  "code": "e2e",
+  "name": "E2E room",
+  "media": [
+    { "id": "bbb-1", "name": "Big Buck Bunny (clip A)", "url": "/media/bbb/master.m3u8" },
+    { "id": "bbb-2", "name": "Big Buck Bunny (clip B)", "url": "/media/bbb/master.m3u8" }
+  ]
+}

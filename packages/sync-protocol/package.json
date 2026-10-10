@@ -1,0 +1,38 @@
+{
+  "name": "@live-video-sync/sync-protocol",
+  "version": "0.0.0",
+  "description": "WebSocket sync protocol: TypeBox message schemas, playback state, room reducer",
+  "author": "bennettrwu",
+  "license": "MIT",
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "type": "module",
+  "imports": {
+    "#src/*": {
+      "development": "./src/*",
+      "default": "./dist/src/*"
+    },
+    "#tests/*": {
+      "development": "./tests/*",
+      "default": "./dist/tests/*"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "format": "prettier --check ./src ./tests",
+    "format:fix": "prettier --write ./src ./tests",
+    "lint": "eslint ./src ./tests",
+    "lint:fix": "eslint ./src ./tests --fix",
+    "test:dev": "vitest --ui --coverage",
+    "test:unit": "vitest run --project unit"
+  },
+  "dependencies": {
+    "typebox": "1.1.5"
+  }
+}

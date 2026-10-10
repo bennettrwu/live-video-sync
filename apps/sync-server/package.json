@@ -1,0 +1,43 @@
+{
+  "name": "@live-video-sync/sync-server",
+  "version": "0.0.0",
+  "description": "Room sync server",
+  "author": "bennettrwu",
+  "license": "MIT",
+  "main": "dist/src/index.js",
+  "type": "module",
+  "imports": {
+    "#src/*": {
+      "development": "./src/*",
+      "default": "./dist/src/*"
+    },
+    "#tests/*": {
+      "development": "./tests/*",
+      "default": "./dist/tests/*"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "start": "node ./dist/src/index.js",
+    "dev": "tsc --build && concurrently -k \"tsc --build --watch\" \"node --watch-path=dist dist/src/index.js | pino-pretty\"",
+    "format": "prettier --check ./src ./tests",
+    "format:fix": "prettier --write ./src ./tests",
+    "lint": "eslint ./src ./tests",
+    "lint:fix": "eslint ./src ./tests --fix",
+    "test:dev": "vitest --ui --coverage",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration"
+  },
+  "dependencies": {
+    "@fastify/static": "10.1.5",
+    "@fastify/websocket": "11.2.0",
+    "@live-video-sync/fastify-platform": "*",
+    "@live-video-sync/sync-protocol": "*",
+    "fastify": "5.12.5",
+    "fastify-plugin": "5.1.0",
+    "ws": "8.21.1"
+  },
+  "devDependencies": {
+    "@types/ws": "8.18.1"
+  }
+}

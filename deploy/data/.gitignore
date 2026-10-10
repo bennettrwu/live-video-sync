@@ -1,0 +1,4 @@
+rooms/
+media/*
+!media/convert-to-hls.sh
+!.gitkeep

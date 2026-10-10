@@ -1,0 +1,27 @@
+# From the repo root:  docker compose -f deploy/compose.yml up -d --build
+# Rooms live in ./deploy/data/rooms/<code>.json, media in ./deploy/data/media/.
+services:
+  sync-server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: sync-server
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: info
+    volumes:
+      - ./data/rooms:/data/rooms:ro
+      - ./data/media:/data/media:ro
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: frontend
+    restart: unless-stopped
+    depends_on:
+      - sync-server
+    ports:
+      - "127.0.0.1:8000:80"
+    volumes:
+      - ./data/media:/data/media:ro
